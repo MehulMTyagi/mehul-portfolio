@@ -298,7 +298,7 @@ window.addEventListener('load', () => {
 
 	if (card2 && itemsContainer) {
 		const webpAssets = [
-			{ name: "appenure suhail submission.webp", ratio: "9:16" },
+			{ name: "appenure mehul submission.webp", ratio: "9:16" },
 			{ name: "AQPpsBSS6Wy7caQBBrSfr_d9sKi4u0nyUbelDE9b1RUYexHoEn672ZaHhWqZWObSFQlddb9M4cqBA0oY0siQWP9B.webp", ratio: "16:9" },
 			{ name: "crc v1 THURDAY.webp", ratio: "16:9" },
 			{ name: "FLAGSHIP CRC.webp", ratio: "16:9" },

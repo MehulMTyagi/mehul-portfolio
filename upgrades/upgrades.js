@@ -18,13 +18,13 @@ function initNodePipeline() {
     llmCompiled: false,
     imageGenerated: false,
     audioEnabled: false,
-    suhailEnabled: false,
+    mehulEnabled: false,
     connections: {
       'choosing-llm': false,
       'llm-image': false,
       'image-video': false,
       'music-video': false,
-      'suhail-video': false
+      'mehul-video': false
     },
     draftCable: null // Currently active drag/click cable line
   };
@@ -184,7 +184,7 @@ function initNodePipeline() {
     drawConnection('llm', 'port-llm-out', 'port-image-in', 'llm-image', '#bd00ff');
     drawConnection('image', 'port-image-out', 'port-video-in-image', 'image-video', '#bd00ff');
     drawConnection('music', 'port-music-out', 'port-video-in-audio', 'music-video', '#39ff14');
-    drawConnection('suhail', 'port-suhail-out', 'port-video-in-suhail', 'suhail-video', '#ff9f43');
+    drawConnection('mehul', 'port-mehul-out', 'port-video-in-mehul', 'mehul-video', '#ff9f43');
 
     // Draw active click-drag/draft wire if moving
     if (pipeline.draftCable) {
@@ -262,7 +262,7 @@ function initNodePipeline() {
 
         // Toggle or start line dragging
         activeOutputPort = { id: portId, node: nodeId };
-        port.classList.add(nodeId === 'music' ? 'glow-green' : (nodeId === 'suhail' ? 'glow-orange' : 'glow-purple'));
+        port.classList.add(nodeId === 'music' ? 'glow-green' : (nodeId === 'mehul' ? 'glow-orange' : 'glow-purple'));
         
         // Initialize draft cable
         const parentRect = cardInner.getBoundingClientRect();
@@ -322,7 +322,7 @@ function initNodePipeline() {
     if (nodeId === 'llm') return pipeline.llmCompiled;
     if (nodeId === 'image') return pipeline.imageGenerated;
     if (nodeId === 'music') return pipeline.audioEnabled;
-    if (nodeId === 'suhail') return pipeline.suhailEnabled;
+    if (nodeId === 'mehul') return pipeline.mehulEnabled;
     return false;
   }
 
@@ -332,7 +332,7 @@ function initNodePipeline() {
     if (originNode === 'llm' && destNode === 'image') return true;
     if (originNode === 'image' && destNode === 'video' && destPortId === 'port-video-in-image') return true;
     if (originNode === 'music' && destNode === 'video' && destPortId === 'port-video-in-audio') return true;
-    if (originNode === 'suhail' && destNode === 'video' && destPortId === 'port-video-in-suhail') return true;
+    if (originNode === 'mehul' && destNode === 'video' && destPortId === 'port-video-in-mehul') return true;
     return false;
   }
 
@@ -362,10 +362,10 @@ function initNodePipeline() {
       document.getElementById('status-audio-link').textContent = 'Audio: Connected';
       document.getElementById('status-audio-link').classList.add('linked');
       checkVideoUnlock();
-    } else if (originNode === 'suhail' && destNode === 'video') {
-      pipeline.connections['suhail-video'] = true;
-      document.getElementById('status-suhail-link').textContent = "Suhail's Touch: Connected";
-      document.getElementById('status-suhail-link').classList.add('linked');
+    } else if (originNode === 'mehul' && destNode === 'video') {
+      pipeline.connections['mehul-video'] = true;
+      document.getElementById('status-mehul-link').textContent = "Mehul's Touch: Connected";
+      document.getElementById('status-mehul-link').classList.add('linked');
       checkVideoUnlock();
     }
 
@@ -539,12 +539,12 @@ function initNodePipeline() {
       statusDot.classList.add('active');
       pipeline.imageGenerated = true;
 
-      // Reveal Music, Suhail's Touch, and Video Compiler Node together dynamically!
+      // Reveal Music, Mehul's Touch, and Video Compiler Node together dynamically!
       const musicNode = document.getElementById('node-music');
-      const suhailNode = document.getElementById('node-suhail');
+      const mehulNode = document.getElementById('node-mehul');
       const videoNode = document.getElementById('node-video');
       if (musicNode) musicNode.classList.remove('hidden-node');
-      if (suhailNode) suhailNode.classList.remove('hidden-node');
+      if (mehulNode) mehulNode.classList.remove('hidden-node');
       if (videoNode) {
         videoNode.classList.remove('hidden-node');
         videoNode.classList.remove('disabled');
@@ -604,31 +604,31 @@ function initNodePipeline() {
     musicToggle.addEventListener('touchstart', handleMusicToggle, { passive: false });
   }
 
-  const suhailToggle = document.getElementById('suhailToggleBtn');
-  if (suhailToggle) {
-    function handleSuhailToggle(e) {
+  const mehulToggle = document.getElementById('mehulToggleBtn');
+  if (mehulToggle) {
+    function handleMehulToggle(e) {
       e.preventDefault();
       e.stopPropagation();
       // Do not toggle if wire is already connected
-      if (pipeline.connections['suhail-video']) return;
+      if (pipeline.connections['mehul-video']) return;
 
-      pipeline.suhailEnabled = !pipeline.suhailEnabled;
+      pipeline.mehulEnabled = !pipeline.mehulEnabled;
 
-      if (pipeline.suhailEnabled) {
-        suhailToggle.classList.add('active');
-        suhailToggle.querySelector('.style-name').textContent = 'Creative Style Active';
+      if (pipeline.mehulEnabled) {
+        mehulToggle.classList.add('active');
+        mehulToggle.querySelector('.style-name').textContent = 'Creative Style Active';
         
-        // Glow the output port of Suhail's Touch Node in orange
-        document.getElementById('port-suhail-out').classList.add('glow-orange');
+        // Glow the output port of Mehul's Touch Node in orange
+        document.getElementById('port-mehul-out').classList.add('glow-orange');
       } else {
-        suhailToggle.classList.remove('active');
-        suhailToggle.querySelector('.style-name').textContent = 'Apply Creative Style';
-        document.getElementById('port-suhail-out').classList.remove('glow-orange');
+        mehulToggle.classList.remove('active');
+        mehulToggle.querySelector('.style-name').textContent = 'Apply Creative Style';
+        document.getElementById('port-mehul-out').classList.remove('glow-orange');
       }
       drawWiring();
     }
-    suhailToggle.addEventListener('click', handleSuhailToggle);
-    suhailToggle.addEventListener('touchstart', handleSuhailToggle, { passive: false });
+    mehulToggle.addEventListener('click', handleMehulToggle);
+    mehulToggle.addEventListener('touchstart', handleMehulToggle, { passive: false });
   }
 
   // Animated sound waves
@@ -668,8 +668,8 @@ function initNodePipeline() {
     const videoNode = document.getElementById('node-video');
     videoNode.classList.remove('disabled');
 
-    // Both audio, image, and suhail's touch connections must be locked
-    if (pipeline.connections['image-video'] && pipeline.connections['music-video'] && pipeline.connections['suhail-video']) {
+    // Both audio, image, and Mehul's touch connections must be locked
+    if (pipeline.connections['image-video'] && pipeline.connections['music-video'] && pipeline.connections['mehul-video']) {
       triggerVideoUnlock();
     }
   }
@@ -690,7 +690,7 @@ function initNodePipeline() {
       // Safely remove glow from output port signals
       document.getElementById('port-image-out')?.classList.remove('glow-purple');
       document.getElementById('port-music-out')?.classList.remove('glow-green');
-      document.getElementById('port-suhail-out')?.classList.remove('glow-orange');
+      document.getElementById('port-mehul-out')?.classList.remove('glow-orange');
 
       const statusDot = videoNode?.querySelector('.node-status-dot');
       statusDot?.classList.add('active');

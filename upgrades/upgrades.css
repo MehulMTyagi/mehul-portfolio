@@ -416,7 +416,7 @@
   stroke-dasharray: 4 4;
 }
 
-.connection-cable.locked-suhail {
+.connection-cable.locked-mehul {
   stroke: rgba(255, 159, 67, 0.7); /* Deep neon signature orange flow */
   stroke-width: 2;
   stroke-dasharray: 4 4;
@@ -1099,7 +1099,7 @@
   transform: translateY(-50%);
 }
 
-.node-port.port-in-suhail {
+.node-port.port-in-mehul {
   left: -15px;
   top: 75%;
   transform: translateY(-50%);
@@ -1129,7 +1129,7 @@
   transform: translateY(-50%);
 }
 
-.port-suhail-desc {
+.port-mehul-desc {
   left: 20px;
   top: 75%;
   transform: translateY(-50%);
