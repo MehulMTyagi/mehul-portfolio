@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
+  <title id="title">AI and machine learning workflow</title>
+  <desc id="desc">A dark notebook-style machine learning diagram with connected model nodes and a chart.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <path d="M0 960C210 820 360 930 560 780C690 682 760 594 900 610V1200H0Z" fill="#111c36"/>
+  <g fill="none" stroke="#26334f" stroke-width="2">
+    <path d="M110 190H790M110 330H790M110 470H790M110 610H790M110 750H790M110 890H790"/>
+    <path d="M170 120V1020M310 120V1020M450 120V1020M590 120V1020M730 120V1020"/>
+  </g>
+  <g stroke="url(#accent)" stroke-width="8" stroke-linecap="round" fill="none" opacity=".9">
+    <path d="M212 758C302 604 398 622 465 505S630 340 724 282"/>
+  </g>
+  <g fill="#e5f8ff">
+    <circle cx="212" cy="758" r="28"/>
+    <circle cx="365" cy="612" r="28"/>
+    <circle cx="465" cy="505" r="28"/>
+    <circle cx="604" cy="360" r="28"/>
+    <circle cx="724" cy="282" r="28"/>
+  </g>
+  <g fill="#111827" stroke="#94a3b8" stroke-width="3">
+    <rect x="170" y="180" width="230" height="128" rx="24"/>
+    <rect x="500" y="180" width="230" height="128" rx="24"/>
+    <rect x="335" y="420" width="230" height="128" rx="24"/>
+  </g>
+  <g fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-weight="700">
+    <text x="220" y="230" font-size="28">DATA</text>
+    <text x="545" y="230" font-size="28">MODEL</text>
+    <text x="382" y="470" font-size="28">PREDICT</text>
+  </g>
+  <g fill="#94a3b8" font-family="Inter, Arial, sans-serif" font-size="18">
+    <text x="220" y="264">clean inputs</text>
+    <text x="545" y="264">train logic</text>
+    <text x="382" y="504">use output</text>
+  </g>
+  <path d="M400 244H500M615 308L505 420M285 308L395 420" stroke="#38bdf8" stroke-width="4" fill="none" stroke-dasharray="14 14"/>
+  <text x="90" y="1080" fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-size="48" font-weight="800">AI / ML</text>
+  <text x="90" y="1130" fill="#94a3b8" font-family="Inter, Arial, sans-serif" font-size="24">learn, train, improve</text>
+</svg>
