@@ -1,0 +1,16 @@
+{
+  "name": "mehul-tyagi-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check visitor-card.js && node --check script.js && node --check upgrades/upgrades.js && node --check api/visitor-cards.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^1.0.2"
+  },
+  "devDependencies": {
+    "vercel": "^48.0.0"
+  }
+}

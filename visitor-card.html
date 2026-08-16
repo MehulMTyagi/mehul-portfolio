@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Visitor card gallery and stats for Mehul Mohan Tyagi's portfolio.">
+  <title>Visitor Card | Mehul Mohan Tyagi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/webp" href="assets/icons/preloader-nav.webp">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="visitor-card.css">
+</head>
+<body class="visitor-page">
+  <div class="custom-cursor" aria-hidden="true"></div>
+
+  <main class="visitor-shell">
+    <div class="visitor-beam visitor-beam-purple" aria-hidden="true"></div>
+    <div class="visitor-beam visitor-beam-green" aria-hidden="true"></div>
+
+    <nav class="visitor-nav" aria-label="Visitor card navigation">
+      <a class="visitor-back-link" href="index.html">Back to portfolio</a>
+      <div class="visitor-nav-actions">
+        <span id="visitorGuestCount">Syncing visitors</span>
+        <button type="button" id="visitorShuffleCards">Shuffle</button>
+        <a href="index.html" class="visitor-nav-button">Create on entry</a>
+      </div>
+    </nav>
+
+    <section class="visitor-hero">
+      <div class="visitor-hero-copy">
+        <span class="visitor-kicker">Mehul Tyagi visitor pass</span>
+        <h1>Visitor ledger.</h1>
+        <p>Cards and stats are synced through the portfolio backend. If the backend is unavailable, this page falls back to local browser cards.</p>
+      </div>
+    </section>
+
+    <section class="visitor-gallery-panel" aria-label="Visitor gallery">
+      <div class="visitor-gallery-header">
+        <div>
+          <span class="visitor-kicker">Live local gallery</span>
+          <h2>Visitor Cards</h2>
+        </div>
+        <strong id="visitorTotalStat">0 cards</strong>
+      </div>
+
+      <details class="visitor-stats" open>
+        <summary>Stats for this browser</summary>
+        <div class="visitor-stats-body">
+          <div class="visitor-chart" aria-hidden="true">
+            <svg viewBox="0 0 640 120" preserveAspectRatio="none">
+              <polyline id="visitorStatsLine" points="0,96 640,96"></polyline>
+            </svg>
+          </div>
+
+          <div class="visitor-color-stats" id="visitorColorStats"></div>
+
+          <div class="visitor-stat-card">
+            <span>Signed cards</span>
+            <strong id="visitorSignedStat">0%</strong>
+          </div>
+
+          <div class="visitor-stat-card">
+            <span>Latest guest</span>
+            <strong id="visitorLatestStat">None</strong>
+          </div>
+        </div>
+      </details>
+
+      <div class="visitor-card-grid" id="visitorCardGrid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="visitor-card.js" defer></script>
+</body>
+</html>

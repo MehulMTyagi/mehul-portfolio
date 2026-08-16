@@ -5,6 +5,98 @@ if (shouldResetScroll && 'scrollRestoration' in history) {
 	history.scrollRestoration = 'manual';
 }
 
+// --- CUSTOM GLOW CURSOR ---
+const customCursor = document.querySelector('.custom-cursor');
+const canUseCustomCursor = customCursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+if (canUseCustomCursor) {
+	let cursorX = window.innerWidth / 2;
+	let cursorY = window.innerHeight / 2;
+	let cursorTargetX = cursorX;
+	let cursorTargetY = cursorY;
+
+	const moveCursor = () => {
+		cursorX += (cursorTargetX - cursorX) * 0.28;
+		cursorY += (cursorTargetY - cursorY) * 0.28;
+		customCursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+		requestAnimationFrame(moveCursor);
+	};
+
+	window.addEventListener('mousemove', (event) => {
+		cursorTargetX = event.clientX;
+		cursorTargetY = event.clientY;
+		customCursor.classList.add('is-visible');
+	});
+
+	document.addEventListener('mouseleave', () => {
+		customCursor.classList.remove('is-visible');
+	});
+
+	document.addEventListener('mouseover', (event) => {
+		const isInteractive = event.target.closest('a, button, input, textarea, select, [role="button"]');
+		customCursor.classList.toggle('is-hovering', Boolean(isInteractive));
+	});
+
+	moveCursor();
+}
+
+// --- HERO WORD SHOVE EFFECT ---
+const shoveContainers = document.querySelectorAll('[data-shove-text]');
+
+if (shoveContainers.length > 0 && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+	const shoveWords = [];
+	const shoveRadius = 132;
+	const shoveStrength = 34;
+
+	shoveContainers.forEach((container) => {
+		const words = container.textContent.trim().split(/\s+/);
+		container.textContent = '';
+
+		words.forEach((word, index) => {
+			const span = document.createElement('span');
+			span.dataset.shove = '';
+			span.textContent = word;
+			container.appendChild(span);
+
+			if (index < words.length - 1) {
+				container.appendChild(document.createTextNode(' '));
+			}
+
+			shoveWords.push(span);
+		});
+	});
+
+	const updateShove = (event) => {
+		shoveWords.forEach((word) => {
+			const rect = word.getBoundingClientRect();
+			const centerX = rect.left + rect.width / 2;
+			const centerY = rect.top + rect.height / 2;
+			const deltaX = centerX - event.clientX;
+			const deltaY = centerY - event.clientY;
+			const distance = Math.hypot(deltaX, deltaY);
+
+			if (distance > shoveRadius || distance === 0) {
+				word.style.transform = 'translate3d(0, 0, 0)';
+				return;
+			}
+
+			const force = (1 - distance / shoveRadius) * shoveStrength;
+			const x = (deltaX / distance) * force;
+			const y = (deltaY / distance) * force;
+			word.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+		});
+	};
+
+	const resetShove = () => {
+		shoveWords.forEach((word) => {
+			word.style.transform = 'translate3d(0, 0, 0)';
+		});
+	};
+
+	window.addEventListener('mousemove', updateShove);
+	document.querySelector('.hero')?.addEventListener('mouseleave', resetShove);
+}
+
 // --- BACKGROUND MUSIC INITIALIZATION ---
 const bgm = new Audio();
 bgm.loop = true;
@@ -292,82 +384,6 @@ window.addEventListener('load', () => {
 	pupilLayers.forEach((layer) => {
 		layer.style.transform = 'translate3d(0px, 0px, 0)';
 	});
-	// --- SAVOIR FAIRE LP FOR CARD-2 ---
-	const card2 = document.querySelector("#card-2");
-	const itemsContainer = card2?.querySelector(".items-container");
-
-	if (card2 && itemsContainer) {
-		const webpAssets = [
-			{ name: "appenure mehul submission.webp", ratio: "9:16" },
-			{ name: "AQPpsBSS6Wy7caQBBrSfr_d9sKi4u0nyUbelDE9b1RUYexHoEn672ZaHhWqZWObSFQlddb9M4cqBA0oY0siQWP9B.webp", ratio: "16:9" },
-			{ name: "crc v1 THURDAY.webp", ratio: "16:9" },
-			{ name: "FLAGSHIP CRC.webp", ratio: "16:9" },
-			{ name: "jacob final.webp", ratio: "16:9" },
-			{ name: "shorts prompt OT (1).webp", ratio: "9:16" },
-			{ name: "shorts prompt OT.webp", ratio: "9:16" },
-			{ name: "SIR MAIN.webp", ratio: "9:16" },
-			{ name: "Take a look at my Canva design!.webp", ratio: "16:9" }
-		];
-
-		card2.addEventListener("click", function (event) {
-			let container = document.createElement("div");
-
-			const randomAsset = webpAssets[Math.floor(Math.random() * webpAssets.length)];
-			const isPortrait = randomAsset.ratio === "9:16";
-			const elementWidth = isPortrait ? 360 : 640;
-			const className = isPortrait ? "portrait" : "landscape";
-
-			container.innerHTML = `<div class="img-container ${className}">
-										 <img src="card 2 assest/${randomAsset.name}" alt="" />
-									   </div>`;
-
-			const appendedElement = container.firstChild;
-			itemsContainer.appendChild(appendedElement);
-
-			const rect = card2.getBoundingClientRect();
-			appendedElement.style.left = `${event.clientX - rect.left - elementWidth / 2}px`;
-			appendedElement.style.top = `${event.clientY - rect.top}px`;
-			const randomRotation = Math.random() * 10 - 5;
-
-			gsap.set(appendedElement, {
-				scale: 0,
-				rotation: randomRotation,
-				transformOrigin: "center",
-			});
-
-			const tl = gsap.timeline();
-			const randomScale = Math.random() * 0.5 + 0.5;
-			tl.to(appendedElement, {
-				scale: randomScale,
-				duration: 0.5,
-				delay: 0.1,
-			});
-
-			tl.to(
-				appendedElement,
-				{
-					y: () => `-=500`,
-					opacity: 1,
-					duration: 4,
-					ease: "none",
-				},
-				"<"
-			).to(
-				appendedElement,
-				{
-					opacity: 0,
-					duration: 1,
-					onComplete: () => {
-						if (appendedElement.parentNode) {
-							appendedElement.parentNode.removeChild(appendedElement);
-						}
-					},
-				},
-				"-=0.5"
-			);
-		});
-	}
-
 	animateHero();
 
 
@@ -435,79 +451,6 @@ window.addEventListener('load', () => {
 		});
 	}
 
-	// --- SHOW REEL VIDEO MODAL SCRIPT ---
-	const showReelBtn = document.querySelector('.show-reel-btn[data-open-showreel="true"]');
-	const videoModal = document.getElementById('videoModal');
-	const closeVideoBtn = document.querySelector('.close-video-btn');
-	const videoOverlay = document.querySelector('.video-modal-overlay');
-	const showreelVideo = document.getElementById('showreelVideo');
-
-	if (showReelBtn && videoModal) {
-		showReelBtn.addEventListener('click', (e) => {
-			e.preventDefault();
-
-			// Fire confetti when button is clicked
-			if (typeof confetti === 'function') {
-				const rect = showReelBtn.getBoundingClientRect();
-				const x = (rect.left + rect.width / 2) / window.innerWidth;
-				const y = (rect.top + rect.height / 2) / window.innerHeight;
-				confetti({
-					particleCount: 100,
-					spread: 70,
-					origin: { x, y },
-					colors: ['#4285f4', '#ea4335', '#fbbc04', '#34a853']
-				});
-			}
-
-			// Fade out background music
-			gsap.to(bgm, {
-				volume: 0,
-				duration: 0.8,
-				ease: "power1.out",
-				onComplete: () => bgm.pause()
-			});
-
-			// Show modal and lazy-load showreel video with sound
-			videoModal.classList.add('active');
-			if (showreelVideo) {
-				// Lazy-load: set source only when modal opens (saves ~77MB on page load)
-				const sourceEl = showreelVideo.querySelector('source');
-				if (sourceEl && !showreelVideo.src) {
-					showreelVideo.src = sourceEl.getAttribute('src');
-					showreelVideo.load();
-				}
-				showreelVideo.currentTime = 0;
-				showreelVideo.muted = false;
-				showreelVideo.play().catch(err => console.log("Showreel play failed:", err));
-			}
-		});
-
-		const closeModal = () => {
-			videoModal.classList.remove('active');
-			// Pause and reset the showreel video, remove src to free memory
-			if (showreelVideo) {
-				showreelVideo.pause();
-				showreelVideo.currentTime = 0;
-				showreelVideo.removeAttribute('src');
-				showreelVideo.load(); // Reset the video element to free memory
-			}
-			// Resume background music with fade-in
-			if (bgmStarted) {
-				bgm.play().then(() => {
-					gsap.to(bgm, {
-						volume: 0.12,
-						duration: 1.5,
-						ease: "power1.inOut"
-					});
-				}).catch(err => console.log("BGM resume failed:", err));
-			}
-		};
-
-		closeVideoBtn.addEventListener('click', closeModal);
-		videoOverlay.addEventListener('click', closeModal);
-	}
-
-
 	// --- FLIPBOOK PAGE FLIP SCRIPT ---
 	const flipbook = document.getElementById('flipbook');
 	const flipIndicator = document.getElementById('flipIndicator');
@@ -558,7 +501,6 @@ window.addEventListener('load', () => {
 		updateIndicator();
 	}
 
-
 	// --- INFINITE COVER FLOW FOR CARD-3 ---
 	const card3 = document.querySelector("#card-3");
 	const boxesContainer = card3?.querySelector(".boxes");
@@ -567,66 +509,42 @@ window.addEventListener('load', () => {
 	if (card3 && boxesContainer && boxes.length > 0) {
 		gsap.set(boxes, { yPercent: -50, display: 'block' });
 
-		const DURATION = 1;
-		const STAGGER = DURATION / boxes.length;
-		const OFFSET = 0;
+		const duration = 1;
+		const stagger = duration / boxes.length;
+		const offset = 0;
+		const loop = gsap.timeline({ paused: true, repeat: -1, ease: 'none' });
+		const shifts = [...boxes, ...boxes, ...boxes];
 
-		const LOOP = gsap.timeline({
-			paused: true,
-			repeat: -1,
-			ease: 'none'
-		});
-
-		const SHIFTS = [...boxes, ...boxes, ...boxes];
-
-		SHIFTS.forEach((BOX, index) => {
-			const BOX_TL = gsap.timeline()
-				.set(BOX, {
+		shifts.forEach((box, index) => {
+			const boxTl = gsap.timeline()
+				.set(box, {
 					xPercent: 250,
 					rotateY: -50,
 					opacity: 0,
 					scale: 0.5
 				})
-				// Opacity & Scale
-				.to(BOX, {
-					opacity: 1,
-					scale: 1,
-					duration: 0.1
-				}, 0)
-				.to(BOX, {
-					opacity: 0,
-					scale: 0.5,
-					duration: 0.1
-				}, 0.9)
-				// Panning
-				.fromTo(BOX, {
-					xPercent: 250
-				}, {
+				.to(box, { opacity: 1, scale: 1, duration: 0.1 }, 0)
+				.to(box, { opacity: 0, scale: 0.5, duration: 0.1 }, 0.9)
+				.fromTo(box, { xPercent: 250 }, {
 					xPercent: -350,
 					duration: 1,
 					immediateRender: false,
 					ease: 'power1.inOut'
 				}, 0)
-				// Rotations
-				.fromTo(BOX, {
-					rotateY: -50
-				}, {
+				.fromTo(box, { rotateY: -50 }, {
 					rotateY: 50,
 					immediateRender: false,
 					duration: 1,
 					ease: 'power4.inOut'
 				}, 0)
-				// Scale & Z
-				.to(BOX, {
+				.to(box, {
 					z: 100,
 					scale: 1.25,
 					duration: 0.1,
 					repeat: 1,
 					yoyo: true
 				}, 0.4)
-				.fromTo(BOX, {
-					zIndex: 1
-				}, {
+				.fromTo(box, { zIndex: 1 }, {
 					zIndex: boxes.length,
 					repeat: 1,
 					yoyo: true,
@@ -635,16 +553,15 @@ window.addEventListener('load', () => {
 					immediateRender: false
 				}, 0);
 
-			LOOP.add(BOX_TL, index * STAGGER);
+			loop.add(boxTl, index * stagger);
 		});
 
-		const CYCLE_DURATION = STAGGER * boxes.length;
-		const START_TIME = CYCLE_DURATION + DURATION * 0.5 + OFFSET;
-
-		const LOOP_HEAD = gsap.fromTo(LOOP, 
-			{ totalTime: START_TIME },
+		const cycleDuration = stagger * boxes.length;
+		const startTime = cycleDuration + duration * 0.5 + offset;
+		const loopHead = gsap.fromTo(loop,
+			{ totalTime: startTime },
 			{
-				totalTime: `+=${CYCLE_DURATION}`,
+				totalTime: `+=${cycleDuration}`,
 				duration: 1,
 				ease: 'none',
 				repeat: -1,
@@ -652,185 +569,80 @@ window.addEventListener('load', () => {
 			}
 		);
 
-		const PLAYHEAD = { position: 0 };
-		const POSITION_WRAP = gsap.utils.wrap(0, LOOP_HEAD.duration());
-
+		const playhead = { position: 0 };
+		const positionWrap = gsap.utils.wrap(0, loopHead.duration());
 		const scrollToPosition = (position) => {
-			const SNAP_POS = gsap.utils.snap(1 / boxes.length)(position);
-			gsap.to(PLAYHEAD, {
-				position: SNAP_POS,
+			const snapPosition = gsap.utils.snap(1 / boxes.length)(position);
+			gsap.to(playhead, {
+				position: snapPosition,
 				duration: 0.5,
 				ease: 'power3.out',
-				onUpdate: () => {
-					LOOP_HEAD.totalTime(POSITION_WRAP(PLAYHEAD.position));
-				}
+				onUpdate: () => loopHead.totalTime(positionWrap(playhead.position))
 			});
 		};
 
-		// Navigation buttons
-		const NEXT = () => scrollToPosition(PLAYHEAD.position - 1 / boxes.length);
-		const PREV = () => scrollToPosition(PLAYHEAD.position + 1 / boxes.length);
+		const next = () => scrollToPosition(playhead.position - 1 / boxes.length);
+		const prev = () => scrollToPosition(playhead.position + 1 / boxes.length);
+		card3.querySelector('.next')?.addEventListener('click', next);
+		card3.querySelector('.prev')?.addEventListener('click', prev);
 
-		const nextBtn = card3.querySelector('.next');
-		const prevBtn = card3.querySelector('.prev');
-		if (nextBtn) nextBtn.addEventListener('click', NEXT);
-		if (prevBtn) prevBtn.addEventListener('click', PREV);
-
-		// Keyboard navigation when card-3 is in view
 		document.addEventListener('keydown', event => {
 			const rect = card3.getBoundingClientRect();
 			const inView = rect.top < window.innerHeight && rect.bottom > 0;
-			if (inView) {
-				if (event.code === 'ArrowLeft' || event.code === 'KeyA') NEXT();
-				if (event.code === 'ArrowRight' || event.code === 'KeyD') PREV();
-			}
+			if (!inView) return;
+			if (event.code === 'ArrowLeft' || event.code === 'KeyA') next();
+			if (event.code === 'ArrowRight' || event.code === 'KeyD') prev();
 		});
 
-		// Click on a box to center it, or open in fullscreen if already centered
-		boxesContainer.addEventListener('click', e => {
-			const BOX = e.target.closest('.box');
-			if (BOX) {
-				let TARGET = boxes.indexOf(BOX);
-				let CURRENT = gsap.utils.wrap(
-					0,
-					boxes.length,
-					Math.round(boxes.length * POSITION_WRAP(PLAYHEAD.position))
-				);
+		boxesContainer.addEventListener('click', event => {
+			const box = event.target.closest('.box');
+			if (!box) return;
 
-				if (TARGET === CURRENT) {
-					// Open in fullscreen with audio!
-					const video = BOX.querySelector('video');
-					if (video) {
-						// Save current scroll position to prevent browser scroll-jump glitch on exit
-						const savedScrollY = window.scrollY;
+			const target = boxes.indexOf(box);
+			const current = gsap.utils.wrap(
+				0,
+				boxes.length,
+				Math.round(boxes.length * positionWrap(playhead.position))
+			);
 
-						// Temporarily unmute and show controls for fullscreen
-						video.muted = false;
-						video.controls = true;
-
-						// Fade out background music
-						if (bgmStarted && !bgm.paused) {
-							gsap.to(bgm, {
-								volume: 0,
-								duration: 0.5,
-								ease: "power1.out",
-								onComplete: () => bgm.pause()
-							});
-						}
-
-						// Attempt to enter fullscreen
-						const enterFullscreen = video.requestFullscreen || 
-											    video.webkitRequestFullscreen || 
-											    video.mozRequestFullScreen || 
-											    video.msRequestFullscreen;
-						
-						if (enterFullscreen) {
-							enterFullscreen.call(video).catch(err => {
-								console.error("Error attempting to enable fullscreen:", err);
-							});
-						}
-
-						// Handle exiting fullscreen to mute, hide controls, restore scroll, and resume BGM
-						const onFullscreenChange = () => {
-							const fullscreenElement = document.fullscreenElement || 
-													  document.webkitFullscreenElement || 
-													  document.mozFullScreenElement || 
-													  document.msFullscreenElement;
-							if (fullscreenElement !== video) {
-								video.muted = true;
-								video.controls = false;
-								video.blur(); // Remove focus to prevent browser from scroll-jumping to the element
-
-								// Lock scroll position to savedScrollY to prevent browser scroll-jump glitch on exit
-								const lockScroll = () => {
-									window.scrollTo(0, savedScrollY);
-								};
-								window.addEventListener('scroll', lockScroll);
-
-								// Restore scroll position immediately
-								window.scrollTo(0, savedScrollY);
-
-								// Unlock scroll after 600ms and refresh ScrollTrigger
-								setTimeout(() => {
-									window.removeEventListener('scroll', lockScroll);
-									window.scrollTo(0, savedScrollY);
-									if (typeof ScrollTrigger !== 'undefined') {
-										ScrollTrigger.refresh();
-									}
-								}, 600);
-
-								// Resume background music with fade-in
-								if (bgmStarted) {
-									bgm.play().then(() => {
-										gsap.to(bgm, {
-											volume: 0.12,
-											duration: 1.0,
-											ease: "power1.inOut"
-										});
-									}).catch(err => console.log("BGM resume failed:", err));
-								}
-
-								// Remove listeners
-								document.removeEventListener('fullscreenchange', onFullscreenChange);
-								document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
-								document.removeEventListener('mozfullscreenchange', onFullscreenChange);
-								document.removeEventListener('MSFullscreenChange', onFullscreenChange);
-							}
-						};
-
-						document.addEventListener('fullscreenchange', onFullscreenChange);
-						document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-						document.addEventListener('mozfullscreenchange', onFullscreenChange);
-						document.addEventListener('MSFullscreenChange', onFullscreenChange);
-					}
-				} else {
-					// Center the clicked card
-					let BUMP = TARGET - CURRENT;
-					if (TARGET > CURRENT && TARGET - CURRENT > boxes.length * 0.5) {
-						BUMP = (boxes.length - BUMP) * -1;
-					}
-					if (CURRENT > TARGET && CURRENT - TARGET > boxes.length * 0.5) {
-						BUMP = boxes.length + BUMP;
-					}
-					scrollToPosition(PLAYHEAD.position + BUMP * (1 / boxes.length));
-				}
+			let bump = target - current;
+			if (target > current && target - current > boxes.length * 0.5) {
+				bump = (boxes.length - bump) * -1;
 			}
+			if (current > target && current - target > boxes.length * 0.5) {
+				bump = boxes.length + bump;
+			}
+			scrollToPosition(playhead.position + bump * (1 / boxes.length));
 		});
 
-		// Dragging via Draggable
 		if (typeof Draggable !== 'undefined') {
 			Draggable.create('#card-3 .drag-proxy', {
 				type: 'x',
 				trigger: '#card-3 .boxes',
 				onPress() {
-					this.startOffset = PLAYHEAD.position;
+					this.startOffset = playhead.position;
 				},
 				onDrag() {
-					PLAYHEAD.position = this.startOffset + (this.startX - this.x) * 0.001;
-					LOOP_HEAD.totalTime(POSITION_WRAP(PLAYHEAD.position));
+					playhead.position = this.startOffset + (this.startX - this.x) * 0.001;
+					loopHead.totalTime(positionWrap(playhead.position));
 				},
 				onDragEnd() {
-					scrollToPosition(PLAYHEAD.position);
+					scrollToPosition(playhead.position);
 				}
 			});
 		}
 
-		// Initial animation setup
-		LOOP_HEAD.totalTime(START_TIME);
-
-		// Subtle scroll-driven movement
-		gsap.to(PLAYHEAD, {
+		loopHead.totalTime(startTime);
+		gsap.to(playhead, {
 			scrollTrigger: {
 				trigger: card3,
 				start: 'top bottom',
 				end: 'bottom top',
 				scrub: 1
 			},
-			position: `+=${LOOP_HEAD.duration() * 0.3}`,
+			position: `+=${loopHead.duration() * 0.3}`,
 			ease: 'none',
-			onUpdate: () => {
-				LOOP_HEAD.totalTime(POSITION_WRAP(PLAYHEAD.position));
-			}
+			onUpdate: () => loopHead.totalTime(positionWrap(playhead.position))
 		});
 	}
 
@@ -859,67 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		videoObserver.observe(heroSection);
 	}
-
-
-
-	// --- CREEPY BUTTON INTERACTIVE EYE-TRACKING ---
-	const creepyBtn = document.querySelector('.creepy-btn');
-	if (creepyBtn) {
-		const eyesContainer = creepyBtn.querySelector('.creepy-btn__eyes');
-		const pupils = creepyBtn.querySelectorAll('.creepy-btn__pupil');
-
-		const updateEyes = (e) => {
-			if (!eyesContainer || pupils.length === 0) return;
-
-			// Handle touch or mouse event coordinate vectors
-			const userEvent = e.touches ? e.touches[0] : e;
-			
-			// Center of eyes container relative to client viewport
-			const eyesRect = eyesContainer.getBoundingClientRect();
-			const eyesCenterX = eyesRect.left + eyesRect.width / 2;
-			const eyesCenterY = eyesRect.top + eyesRect.height / 2;
-
-			// Cursor coordinates relative to client viewport
-			const cursorX = userEvent.clientX;
-			const cursorY = userEvent.clientY;
-
-			// Calculate vector difference
-			const dx = cursorX - eyesCenterX;
-			const dy = cursorY - eyesCenterY;
-
-			// Compute eye rotation angle and total distance
-			const angle = Math.atan2(-dy, dx) + Math.PI / 2;
-			const distance = Math.hypot(dx, dy);
-
-			// Define maximum vision track bounds
-			const visionRangeX = 180;
-			const visionRangeY = 75;
-
-			let x = (Math.sin(angle) * distance) / visionRangeX;
-			let y = (Math.cos(angle) * distance) / visionRangeY;
-
-			// Clamp pupil coordinates to realistic bounds
-			x = Math.max(-0.5, Math.min(0.5, x));
-			y = Math.max(-0.5, Math.min(0.5, y));
-
-			// Translate offset from absolute center
-			const translateX = `${-50 + x * 50}%`;
-			const translateY = `${-50 + y * 50}%`;
-
-			pupils.forEach(pupil => {
-				pupil.style.transform = `translate(${translateX}, ${translateY})`;
-			});
-		};
-
-		// Continuously track mouse movement and touch gestures
-		document.addEventListener('mousemove', updateEyes);
-		document.addEventListener('touchmove', updateEyes);
-	}
-
 	// --- TAB VISIBILITY BGM SMOOTH FADE OUT & FADE IN ---
 	document.addEventListener('visibilitychange', () => {
-		const videoModal = document.getElementById('videoModal');
-		const isModalActive = videoModal && videoModal.classList.contains('active');
+		const isModalActive = false;
 
 		// Explicitly kill any active volume tweens to prevent race conditions on quick tab switching
 		gsap.killTweensOf(bgm);
@@ -935,12 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						bgm.pause();
 					}
 				});
-			}
-
-			// Smoothly pause showreel video if it's currently active and playing
-			const showreelVideo = document.getElementById('showreelVideo');
-			if (isModalActive && showreelVideo && !showreelVideo.paused) {
-				showreelVideo.pause();
 			}
 		} else {
 			// User returned to this tab: smoothly play and fade music back in

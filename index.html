@@ -18,7 +18,7 @@
   <meta name="description" content="Portfolio of Mehul Mohan Tyagi, a final-year BCA student focused on AI/ML, Python, web development, and app development." />
 
   <!-- Favicon / Pin Icon -->
-  <link rel="icon" type="image/webp" href="preloder icon/preloader.webp" />
+  <link rel="icon" type="image/webp" href="assets/icons/preloader-nav.webp" />
 
   <!-- Connected Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,17 +30,77 @@
 
   <!-- Connected Styles -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="visitor-card.css" />
   <link rel="stylesheet" href="upgrades/upgrades.css" />
 
 </head>
 
 <body class="preloader-active">
+  <div class="custom-cursor" aria-hidden="true"></div>
+
   <!-- Preloader -->
   <div id="preloader">
     <div class="preloader-content">
-      <img src="ABOUT SECTION/M1-preloader.webp" alt="Preloader" class="flip-y-animation" id="preloader-img">
+      <img src="assets/about/preloader.webp" alt="Preloader" class="flip-y-animation" id="preloader-img">
     </div>
   </div>
+
+  <section class="visitor-entry-modal is-open" id="visitorEntryModal" aria-label="Create your visitor card" aria-hidden="false">
+    <div class="visitor-entry-backdrop" data-visitor-close></div>
+    <div class="visitor-entry-shell">
+      <div class="visitor-entry-copy">
+        <span class="visitor-kicker">Mehul Tyagi visitor pass</span>
+        <h2>Make your card before you enter.</h2>
+        <p>Choose a style, add your name, and save it locally in this browser. Signature is optional.</p>
+      </div>
+
+      <section class="visitor-editor visitor-entry-editor" id="visitorEditor">
+        <div class="visitor-editor-head">
+          <div>
+            <span>Card studio</span>
+            <h3>Create your card</h3>
+          </div>
+          <button type="button" id="visitorRandomName">Random name</button>
+        </div>
+
+        <div class="visitor-form-grid">
+          <label class="visitor-field">
+            <span>Name</span>
+            <input type="text" id="visitorNameInput" maxlength="24" autocomplete="name" placeholder="Your name">
+          </label>
+
+          <label class="visitor-field">
+            <span>Signature <em>optional</em></span>
+            <input type="text" id="visitorSignatureInput" maxlength="28" autocomplete="off" placeholder="Optional sign">
+          </label>
+        </div>
+
+        <p class="visitor-safety-message" id="visitorSafetyMessage" role="status" aria-live="polite"></p>
+
+        <div class="visitor-card-preview" id="visitorCardPreview" aria-live="polite"></div>
+
+        <div class="visitor-style-row" aria-label="Choose card color">
+          <button type="button" class="visitor-swatch is-active" data-card-color="onyx" aria-label="Onyx card"></button>
+          <button type="button" class="visitor-swatch" data-card-color="emerald" aria-label="Emerald card"></button>
+          <button type="button" class="visitor-swatch" data-card-color="violet" aria-label="Violet card"></button>
+          <button type="button" class="visitor-swatch" data-card-color="champagne" aria-label="Champagne card"></button>
+        </div>
+
+        <div class="visitor-pattern-row" aria-label="Choose card pattern">
+          <button type="button" class="visitor-pattern is-active" data-card-pattern="monogram">Monogram</button>
+          <button type="button" class="visitor-pattern" data-card-pattern="orbit">Orbit</button>
+          <button type="button" class="visitor-pattern" data-card-pattern="mesh">Mesh</button>
+          <button type="button" class="visitor-pattern" data-card-pattern="signal">Signal</button>
+        </div>
+
+        <div class="visitor-editor-actions">
+          <button type="button" class="visitor-save-btn" id="visitorSaveCard">Save & enter</button>
+          <button type="button" class="visitor-clear-btn" data-visitor-close>Skip for now</button>
+          <a class="visitor-ledger-link" href="visitor-card.html">View cards</a>
+        </div>
+      </section>
+    </div>
+  </section>
 
   <!-- Header Wrapper -->
   <header class="top-header">
@@ -52,7 +112,7 @@
         <a href="#card-3" class="nav-link">Projects</a>
       </div>
       <a href="#about" class="nav-logo">
-        <img src="preloder icon/preloader-nav.webp" alt="Logo" width="48" height="48">
+        <img src="assets/icons/preloader-nav.webp" alt="Logo" width="48" height="48">
       </a>
       <div class="nav-links right-links">
         <a href="#card-upgrade" class="nav-link">Education</a>
@@ -62,7 +122,7 @@
     </nav>
 
     <!-- Show Reel Button (Right side of Nav) -->
-    <a href="mehul tyagi resume.pdf" target="_blank" class="show-reel-btn">
+    <a href="assets/documents/mehul-tyagi-resume.pdf" target="_blank" class="show-reel-btn">
       Resume
     </a>
   </header>
@@ -75,12 +135,12 @@
     <div class="hero-content">
       <div class="hero-copy">
         <p class="hero-kicker">BCA Student / AI & ML / Python / Web & App Development</p>
-        <h1>Mehul Mohan Tyagi</h1>
-        <p class="hero-subtitle">BCA student at Bennett University, Times Group.</p>
+        <h1 class="shove-text" data-shove-text>Mehul Mohan Tyagi</h1>
+        <p class="hero-subtitle shove-text" data-shove-text>BCA student at Bennett University, Times Group.</p>
 
         <div class="hero-focus">
-          <span>Current focus</span>
-          <strong>Machine learning, web development, and app development.</strong>
+          <span class="shove-text" data-shove-text>Current focus</span>
+          <strong class="shove-text" data-shove-text>Machine learning, web development, and app development.</strong>
         </div>
 
         <div class="hero-tags" aria-label="Core interests">
@@ -93,7 +153,8 @@
         <div class="hero-actions">
           <a href="https://github.com/MehulMTyagi" target="_blank" rel="noreferrer" class="hero-btn hero-btn-primary">GitHub</a>
           <a href="https://www.instagram.com/mehul_tyagiii/" target="_blank" rel="noreferrer" class="hero-btn">Instagram</a>
-          <a href="mehul tyagi resume.pdf" target="_blank" class="hero-btn">Resume</a>
+          <a href="visitor-card.html" class="hero-btn">Visitor Card</a>
+          <a href="assets/documents/mehul-tyagi-resume.pdf" target="_blank" class="hero-btn">Resume</a>
         </div>
       </div>
 
@@ -295,34 +356,66 @@
         </div>
       </div>
     </div>
-    <div class="card" id="card-2">
-      <div class="card-inner">
-        <div class="savoir-faire-lp">
-          <div class="items-container"></div>
-          <div class="reveal-text">
-            <h2>CLICK TO REVEAL</h2>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="card" id="card-3">
       <div class="card-inner">
-        <div class="glitch-title" data-text="MOTION GRAPHICS">MOTION GRAPHICS</div>
-        <div class="boxes">
-          <div class="box" style="--src: url('card3/portfoliofinal.mp4')"><span>1</span><video src="card3/portfoliofinal.mp4" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/saas animation onekey notes.mp4')"><span>2</span><video src="card3/saas animation onekey notes.mp4" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/DOGGY DON.mp4')"><span>3</span><video src="card3/DOGGY DON.mp4" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/one key -1.mov')"><span>4</span><video src="card3/one key -1.mov" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/mine version-3.mov')"><span>5</span><video src="card3/mine version-3.mov" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/alpha law final comp.mov')"><span>6</span><video src="card3/alpha law final comp.mov" loop muted playsinline autoplay></video></div>
-          <div class="box" style="--src: url('card3/From Klickpin.com- Build these cozy ways to style your wedding hairstyle youll want to recreate this weekend that balance trend comfort and everyd.mp4')"><span>7</span><video src="card3/From Klickpin.com- Build these cozy ways to style your wedding hairstyle youll want to recreate this weekend that balance trend comfort and everyd.mp4" loop muted playsinline autoplay></video></div>
+        <div class="glitch-title" data-text="PROJECTS">PROJECTS</div>
+        <div class="boxes" aria-label="PROJECTS carousel">
+          <div class="box" style="--card-accent: #8b5cf6;">
+            <span>1</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>Portfolio Reveal</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #22d3ee;">
+            <span>2</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>SaaS Notes Animation</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #f59e0b;">
+            <span>3</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>Character Promo</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #34d399;">
+            <span>4</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>App Walkthrough</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #f472b6;">
+            <span>5</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>Brand Sequence</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #60a5fa;">
+            <span>6</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>Law Firm Opener</h3>
+            </div>
+          </div>
+          <div class="box" style="--card-accent: #a3e635;">
+            <span>7</span>
+            <div class="motion-card-face">
+              <p>Motion demo</p>
+              <h3>Social Edit</h3>
+            </div>
+          </div>
           <div class="controls">
-            <button class="next" aria-label="Previous"><span>Previous</span>
+            <button class="next" aria-label="Previous motion card"><span>Previous</span>
               <svg viewBox="0 0 448 512" width="100" title="Previous">
                 <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path>
               </svg>
             </button>
-            <button class="prev" aria-label="Next"><span>Next</span>
+            <button class="prev" aria-label="Next motion card"><span>Next</span>
               <svg viewBox="0 0 448 512" width="100" title="Next">
                 <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path>
               </svg>
@@ -651,17 +744,21 @@
       <div class="bento-col col-left">
         <div class="bento-card">
           <div class="bento-card-inner">
-            <div class="bento-card-front"><img src="ABOUT SECTION/M2.webp" loading="lazy" alt="M2 Front"></div>
-            <div class="bento-card-back"><img src="ABOUT SECTION/M2.2.webp" loading="lazy" alt="M2 Back"></div>
+            <div class="bento-card-front"><img src="assets/about/left-top-front.webp" loading="lazy" alt="About card front"></div>
+            <div class="bento-card-back"><img src="assets/about/left-top-back.webp" loading="lazy" alt="About card back"></div>
           </div>
         </div>
-        <div class="bento-card">
+        <div class="bento-card contact-card">
           <div class="bento-card-inner">
-            <div class="bento-card-front"><img src="ABOUT SECTION/M3.webp" loading="lazy" alt="M3 Front"></div>
+            <div class="bento-card-front"><img src="assets/about/left-bottom.webp" loading="lazy" alt="Contact card front"></div>
             <div class="bento-card-back">
-              <img src="ABOUT SECTION/M3.3.webp" loading="lazy" alt="M3 Back">
+              <img src="assets/about/left-bottom.webp" loading="lazy" alt="Contact card back">
               <div class="contact-overlay">
                 <p class="explore-social-text">let's connect</p>
+                <div class="contact-details">
+                  <a href="tel:+919997309704">+91 9997309704</a>
+                  <a href="https://github.com/MehulMTyagi" target="_blank" rel="noreferrer">github.com/MehulMTyagi</a>
+                </div>
                 <div class="contact-socials">
                   <a href="mailto:Mehultyagi10@gmail.com"
                     target="_blank" class="social-icon" aria-label="Email Mehul">
@@ -672,9 +769,9 @@
                     </svg>
                   </a>
                   <a href="https://www.instagram.com/mehul_tyagiii/" target="_blank" class="social-icon"><img
-                      src="icons8-instagram-100.png" alt="Instagram"></a>
-                  <a href="https://www.linkedin.com/" target="_blank" class="social-icon"><img
-                      src="icons8-linkedin-100.png" alt="LinkedIn"></a>
+                      src="assets/icons/instagram.png" alt="Instagram"></a>
+                  <a href="https://www.linkedin.com/in/mehul-tyagi-52704a371/" target="_blank" class="social-icon"><img
+                      src="assets/icons/linkedin.png" alt="LinkedIn"></a>
                 </div>
               </div>
             </div>
@@ -686,8 +783,8 @@
       <div class="bento-col col-center">
         <div class="bento-card">
           <div class="bento-card-inner">
-            <div class="bento-card-front"><img src="ABOUT SECTION/M1.webp" loading="lazy" alt="M1 Front"></div>
-            <div class="bento-card-back"><img src="ABOUT SECTION/M1.1.webp" loading="lazy" alt="M1 Back"></div>
+            <div class="bento-card-front"><img src="assets/about/center-front.webp" loading="lazy" alt="Profile card front"></div>
+            <div class="bento-card-back"><img src="assets/about/center-back.webp" loading="lazy" alt="Profile card back"></div>
           </div>
         </div>
       </div>
@@ -696,45 +793,20 @@
       <div class="bento-col col-right">
         <div class="bento-card">
           <div class="bento-card-inner">
-            <div class="bento-card-front"><img src="ABOUT SECTION/M4.webp" loading="lazy" alt="M4 Front"></div>
-            <div class="bento-card-back"><img src="ABOUT SECTION/M4.4.webp" loading="lazy" alt="M4 Back"></div>
+            <div class="bento-card-front"><img src="assets/about/right-top-front.webp" loading="lazy" alt="About card front"></div>
+            <div class="bento-card-back"><img src="assets/about/right-top-back.webp" loading="lazy" alt="About card back"></div>
           </div>
         </div>
         <div class="bento-card">
           <div class="bento-card-inner">
-            <div class="bento-card-front"><img src="ABOUT SECTION/M5.webp" loading="lazy" alt="M5 Front"></div>
-            <div class="bento-card-back"><img src="ABOUT SECTION/M5.5.webp" loading="lazy" alt="M5 Back"></div>
+            <div class="bento-card-front"><img src="assets/about/right-bottom-front.webp" loading="lazy" alt="About card front"></div>
+            <div class="bento-card-back"><img src="assets/about/right-bottom-back.webp" loading="lazy" alt="About card back"></div>
           </div>
         </div>
       </div>
     </div>
   </section>
   <!-- ======================= -->
-
-  <!-- Video Pop-up Modal -->
-  <div class="video-modal" id="videoModal">
-    <div class="video-modal-overlay"></div>
-    <button class="close-video-btn" aria-label="Close video">&times;</button>
-    <div class="video-modal-content">
-      <div class="video-container">
-        <video id="showreelVideo" controls playsinline preload="none">
-        <source src="final reveal showreelmp4.mp4" type="video/mp4">
-      </video>
-      </div>
-      <!-- View Resume PDF Button -->
-      <a href="mehul tyagi resume.pdf" target="_blank" class="creepy-btn">
-        <span class="creepy-btn__eyes">
-          <span class="creepy-btn__eye">
-            <span class="creepy-btn__pupil"></span>
-          </span>
-          <span class="creepy-btn__eye">
-            <span class="creepy-btn__pupil"></span>
-          </span>
-        </span>
-        <span class="creepy-btn__cover">View Resume PDF</span>
-      </a>
-    </div>
-  </div>
 
   <!-- Connected libs -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
@@ -745,6 +817,7 @@
   <!-- split-type removed: loaded but never used in any script -->
 
   <!-- Connected script -->
+  <script src="visitor-card.js" defer></script>
   <script src="upgrades/upgrades.js" defer></script>
   <script src="script.js" defer></script>
 </body>
