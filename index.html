@@ -16,7 +16,7 @@
   <title>Mehul Mohan Tyagi - BCA Student Portfolio</title>
   <meta name="description" content="Portfolio of Mehul Mohan Tyagi, a final-year BCA student focused on AI/ML, Python, web development, and app development." />
 
-  <!-- Favicon / Pin Icon   -->
+  <!-- Favicon / Pin Icon -->
   <link rel="icon" type="image/webp" href="assets/icons/preloader-nav.webp" />
 
   <!-- Connected Fonts -->
@@ -35,7 +35,13 @@
 </head>
 
 <body class="preloader-active">
-  <div class="custom-cursor" aria-hidden="true"></div>
+  <div class="custom-cursor target-cursor-wrapper" aria-hidden="true">
+    <div class="target-cursor-dot"></div>
+    <div class="target-cursor-corner corner-tl"></div>
+    <div class="target-cursor-corner corner-tr"></div>
+    <div class="target-cursor-corner corner-br"></div>
+    <div class="target-cursor-corner corner-bl"></div>
+  </div>
 
   <!-- Preloader -->
   <div id="preloader">
@@ -46,26 +52,26 @@
 
   <section class="visitor-entry-modal is-open" id="visitorEntryModal" aria-label="Create your visitor card" aria-hidden="false">
     <div class="visitor-entry-backdrop" data-visitor-close></div>
+    <button type="button" class="visitor-entry-back" data-visitor-close aria-label="Close visitor card editor">Back</button>
+    <a class="visitor-entry-info" href="visitor-card.html" aria-label="Open visitor gallery">i</a>
     <div class="visitor-entry-shell">
       <div class="visitor-entry-copy">
-        <span class="visitor-kicker">Mehul Tyagi visitor pass</span>
-        <h2>Make your card before you enter.</h2>
-        <p>Choose a style, add your name, and save it locally in this browser. Signature is optional.</p>
+        <span class="visitor-kicker">Edit your card.</span>
+        <h2>Change anything you like.</h2>
       </div>
 
       <section class="visitor-editor visitor-entry-editor" id="visitorEditor">
-        <div class="visitor-editor-head">
-          <div>
-            <span>Card studio</span>
-            <h3>Create your card</h3>
-          </div>
-          <button type="button" id="visitorRandomName">Random name</button>
-        </div>
-
         <div class="visitor-form-grid">
           <label class="visitor-field">
             <span>Name</span>
-            <input type="text" id="visitorNameInput" maxlength="24" autocomplete="name" placeholder="Your name">
+            <span class="visitor-name-control">
+              <input type="text" id="visitorNameInput" maxlength="24" autocomplete="name" placeholder="Your name">
+              <button type="button" id="visitorRandomName" aria-label="Generate a visitor name">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 11a8.1 8.1 0 0 0-14.2-4.9L4 8m0 0V3m0 5h5M4 13a8.1 8.1 0 0 0 14.2 4.9L20 16m0 0v5m0-5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </span>
           </label>
 
           <label class="visitor-field">
@@ -93,8 +99,9 @@
         </div>
 
         <div class="visitor-editor-actions">
-          <button type="button" class="visitor-save-btn" id="visitorSaveCard">Save & enter</button>
-          <button type="button" class="visitor-clear-btn" data-visitor-close>Skip for now</button>
+          <button type="button" class="visitor-save-btn" id="visitorSaveCard">Save -></button>
+          <button type="button" class="visitor-delete-btn" id="visitorClearCard">Delete card</button>
+          <button type="button" class="visitor-clear-btn" data-visitor-close>Skip</button>
           <a class="visitor-ledger-link" href="visitor-card.html">View cards</a>
         </div>
       </section>
@@ -104,7 +111,7 @@
   <!-- Header Wrapper -->
   <header class="top-header">
     <!-- Navigation Bar -->
-    <nav class="glass-nav">
+    <nav class="glass-nav glass-surface cursor-target">
       <div class="nav-hover-bg"></div>
       <div class="nav-links left-links">
         <a href="#card-4" class="nav-link">Capabilities</a>
@@ -127,6 +134,7 @@
   </header>
 
   <section class="hero" id="hero-section">
+    <div class="hero-gradient-waves" data-gradient-waves aria-hidden="true"></div>
     <div class="hero-grid" aria-hidden="true"></div>
     <div class="hero-beam hero-beam-one" aria-hidden="true"></div>
     <div class="hero-beam hero-beam-two" aria-hidden="true"></div>
@@ -358,65 +366,93 @@
     <div class="card" id="card-3">
       <div class="card-inner">
         <div class="glitch-title" data-text="PROJECTS">PROJECTS</div>
-        <div class="boxes" aria-label="PROJECTS carousel">
-          <div class="box" style="--card-accent: #8b5cf6;">
+        <div class="boxes" aria-label="Projects carousel">
+          <div class="box project-box" style="--card-accent: #64f28a;">
             <span>1</span>
             <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>Portfolio Reveal</h3>
+              <img src="assets/projects/hybrid-intrusion-detection.png" loading="lazy" alt="Hybrid Intrusion Detection System dashboard screenshot">
+              <div class="project-copy">
+                <p>Industrial AI project</p>
+                <h3>Hybrid Intrusion Detection System</h3>
+                <span>Detects malicious network traffic, classifies attack types, calculates anomaly-based risk scores, and stores high-risk alerts during live monitoring.</span>
+                <div class="project-stack">
+                  <small>Python</small>
+                  <small>Flask</small>
+                  <small>Scikit-learn</small>
+                  <small>Random Forest</small>
+                  <small>Isolation Forest</small>
+                  <small>Scapy</small>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="box" style="--card-accent: #22d3ee;">
+
+          <div class="box project-box" style="--card-accent: #22d3ee;">
             <span>2</span>
             <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>SaaS Notes Animation</h3>
+              <img src="assets/projects/weather-wise.png" loading="lazy" alt="Weather Wise live weather and time website screenshot">
+              <div class="project-copy">
+                <p>Live utility website</p>
+                <h3>Weather Wise</h3>
+                <span>Live time and weather site with city search, location display, temperature conversion, and recently visited places.</span>
+                <div class="project-stack">
+                  <small>HTML</small>
+                  <small>CSS</small>
+                  <small>JavaScript</small>
+                  <small>Weather API</small>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="box" style="--card-accent: #f59e0b;">
+
+          <div class="box project-box" style="--card-accent: #2dd4bf;">
             <span>3</span>
             <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>Character Promo</h3>
+              <img src="assets/projects/smart-recover.png" loading="lazy" alt="Smart Recover campus lost and found application screenshot">
+              <div class="project-copy">
+                <p>University web app</p>
+                <h3>Smart Recover</h3>
+                <span>Campus lost-and-found system with smart matching, admin verification, claim approval, and office pickup flow.</span>
+                <div class="project-stack">
+                  <small>HTML</small>
+                  <small>CSS</small>
+                  <small>JavaScript</small>
+                  <small>Python</small>
+                  <small>SMTP</small>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="box" style="--card-accent: #34d399;">
+
+          <div class="box project-box" style="--card-accent: #34d399;">
             <span>4</span>
             <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>App Walkthrough</h3>
+              <img src="assets/projects/sneakers-ecommerce.png" loading="lazy" alt=".sneakers ecommerce website screenshot">
+              <div class="project-copy">
+                <p>Ecommerce website</p>
+                <h3>.sneakers</h3>
+                <span>Online sneaker store concept with seasonal landing visuals, product sections, and an AI chatbot entry point.</span>
+                <div class="project-stack">
+                  <small>HTML</small>
+                  <small>CSS</small>
+                  <small>JavaScript</small>
+                  <small>AI Chatbot</small>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="box" style="--card-accent: #f472b6;">
-            <span>5</span>
-            <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>Brand Sequence</h3>
-            </div>
-          </div>
-          <div class="box" style="--card-accent: #60a5fa;">
-            <span>6</span>
-            <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>Law Firm Opener</h3>
-            </div>
-          </div>
-          <div class="box" style="--card-accent: #a3e635;">
-            <span>7</span>
-            <div class="motion-card-face">
-              <p>Motion demo</p>
-              <h3>Social Edit</h3>
-            </div>
-          </div>
+
           <div class="controls">
-            <button class="next" aria-label="Previous motion card"><span>Previous</span>
-              <svg viewBox="0 0 448 512" width="100" title="Previous">
-                <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path>
+            <button class="next" aria-label="Previous project">
+              <span>Previous</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 4l8 8-8 8"/>
               </svg>
             </button>
-            <button class="prev" aria-label="Next motion card"><span>Next</span>
-              <svg viewBox="0 0 448 512" width="100" title="Next">
-                <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path>
+            <button class="prev" aria-label="Next project">
+              <span>Next</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 4l8 8-8 8"/>
               </svg>
             </button>
           </div>
@@ -424,7 +460,6 @@
         <div class="drag-proxy"></div>
       </div>
     </div>
-
     <div class="card education-section-card" id="card-upgrade">
       <div class="card-inner">
         <section class="education-board" aria-labelledby="education-title">
@@ -816,6 +851,8 @@
   <!-- split-type removed: loaded but never used in any script -->
 
   <!-- Connected script -->
+  <script src="target-cursor.js" defer></script>
+  <script src="hero-gradient-waves.js" defer></script>
   <script src="visitor-card.js" defer></script>
   <script src="upgrades/upgrades.js" defer></script>
   <script src="script.js" defer></script>

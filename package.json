@@ -5,10 +5,11 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vercel dev",
-    "check": "node --check visitor-card.js && node --check script.js && node --check upgrades/upgrades.js && node --check api/visitor-cards.js"
+    "check": "node --check target-cursor.js && node --check hero-gradient-waves.js && node --check visitor-card.js && node --check script.js && node --check upgrades/upgrades.js && node --check api/visitor-cards.js"
   },
   "dependencies": {
-    "@vercel/blob": "^1.0.2"
+    "@vercel/blob": "^1.0.2",
+    "gsap": "^3.15.0"
   },
   "devDependencies": {
     "vercel": "^48.0.0"

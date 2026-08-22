@@ -62,7 +62,44 @@ module.exports = async function handler(req, res) {
 			});
 		}
 
-		res.setHeader('Allow', 'GET, POST');
+		if (req.method === 'DELETE') {
+			if (!isConfigured()) {
+				return sendJson(res, 503, {
+					ok: false,
+					error: 'Visitor backend is not configured yet.'
+				});
+			}
+
+			const body = await readJsonBody(req);
+			const id = cleanText(body && body.id, 80);
+
+			if (!id) {
+				return sendJson(res, 400, {
+					ok: false,
+					error: 'Missing card id.'
+				});
+			}
+
+			const cards = await readCards();
+			const nextCards = cards.filter(card => card.id !== id);
+
+			if (nextCards.length === cards.length) {
+				return sendJson(res, 404, {
+					ok: false,
+					error: 'Card not found.'
+				});
+			}
+
+			await writeCards(nextCards);
+
+			return sendJson(res, 200, {
+				ok: true,
+				cards: nextCards,
+				stats: buildStats(nextCards)
+			});
+		}
+
+		res.setHeader('Allow', 'GET, POST, DELETE');
 		return sendJson(res, 405, {
 			ok: false,
 			error: 'Method not allowed.'

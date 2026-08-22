@@ -97,7 +97,6 @@ const cardDefaults = {
 };
 
 const dom = {
-	cursor: document.querySelector('.custom-cursor'),
 	entryModal: document.getElementById('visitorEntryModal'),
 	editor: document.getElementById('visitorEditor'),
 	nameInput: document.getElementById('visitorNameInput'),
@@ -111,29 +110,13 @@ const dom = {
 	signedStat: document.getElementById('visitorSignedStat'),
 	latestStat: document.getElementById('visitorLatestStat'),
 	statsLine: document.getElementById('visitorStatsLine'),
-	saveButton: document.getElementById('visitorSaveCard')
+	saveButton: document.getElementById('visitorSaveCard'),
+	deleteButton: document.getElementById('visitorClearCard')
 };
 
 let state = createDraft();
 let backendCards = null;
 let backendConfigured = false;
-
-function setupCursor() {
-	if (!document.body.classList.contains('visitor-page') || !dom.cursor || window.matchMedia('(pointer: coarse)').matches) return;
-
-	const moveCursor = (event) => {
-		dom.cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
-		dom.cursor.classList.add('is-visible');
-	};
-
-	window.addEventListener('pointermove', moveCursor);
-	document.addEventListener('mouseleave', () => dom.cursor.classList.remove('is-visible'));
-	document.addEventListener('mouseover', (event) => {
-		const isInteractive = event.target.closest('a, button, input, textarea, select, summary, [role="button"]');
-		dom.cursor.classList.toggle('is-hovering', Boolean(isInteractive));
-	});
-	document.documentElement.classList.add('has-custom-cursor');
-}
 
 function createId() {
 	if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -268,6 +251,31 @@ async function saveCardToBackend(card) {
 	}
 }
 
+async function deleteCardFromBackend(id) {
+	try {
+		const response = await fetch(API_URL, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			},
+			body: JSON.stringify({ id })
+		});
+
+		const payload = await response.json().catch(() => null);
+		if (!response.ok || !payload || !payload.ok) {
+			renderSafety(payload && payload.error ? payload.error : 'Card could not be deleted from the shared gallery.');
+			return null;
+		}
+
+		return payload;
+	} catch (error) {
+		console.warn('Visitor backend delete failed.', error);
+		renderSafety('Backend unavailable. Card was not deleted from the shared gallery.');
+		return null;
+	}
+}
+
 function upsertLocalCard(draft) {
 	const cards = readLocalCards();
 	const existingIndex = cards.findIndex(card => card.id === draft.id);
@@ -299,9 +307,34 @@ function nextLocalCardNumber(cards) {
 	return cards.reduce((max, card) => Math.max(max, Number(card.number || 0)), BASE_GUEST_COUNT) + 1;
 }
 
-function clearCurrentCard() {
+async function clearCurrentCard() {
 	const currentId = localStorage.getItem(CURRENT_ID_KEY);
-	if (!currentId) return;
+	if (!currentId) {
+		renderSafety('No saved card to delete yet.');
+		return;
+	}
+
+	if (!window.confirm('Delete your visitor card?')) return;
+
+	if (dom.deleteButton) dom.deleteButton.disabled = true;
+	renderSafety('Deleting your card...');
+
+	if (backendConfigured) {
+		const backendResult = await deleteCardFromBackend(currentId);
+		if (!backendResult) {
+			if (dom.deleteButton) dom.deleteButton.disabled = false;
+			return;
+		}
+
+		backendCards = backendResult.cards || [];
+		writeCards(backendCards);
+		localStorage.removeItem(CURRENT_ID_KEY);
+		state = createDraft({ number: BASE_GUEST_COUNT + backendCards.length + 1 });
+		syncInputs();
+		renderAll();
+		renderSafety('Card deleted. You can make a new one anytime.');
+		return;
+	}
 
 	const cards = readCards().filter(card => card.id !== currentId);
 	writeCards(cards);
@@ -309,6 +342,7 @@ function clearCurrentCard() {
 	state = createDraft({ number: BASE_GUEST_COUNT + cards.length + 1 });
 	syncInputs();
 	renderAll();
+	renderSafety('Card deleted. You can make a new one anytime.');
 }
 
 function normalizeColor(color) {
@@ -598,6 +632,10 @@ function syncControls() {
 	document.querySelectorAll('[data-card-pattern]').forEach(button => {
 		button.classList.toggle('is-active', button.dataset.cardPattern === state.pattern);
 	});
+	if (dom.deleteButton) {
+		const currentId = localStorage.getItem(CURRENT_ID_KEY);
+		dom.deleteButton.disabled = !currentId;
+	}
 }
 
 function updateDraft(partial) {
@@ -659,7 +697,6 @@ function closeEntryModal() {
 	dom.entryModal.setAttribute('aria-hidden', 'true');
 }
 
-setupCursor();
 loadCurrentDraft();
 bindEvents();
 renderAll();

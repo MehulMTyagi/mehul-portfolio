@@ -13,7 +13,13 @@
   <link rel="stylesheet" href="visitor-card.css">
 </head>
 <body class="visitor-page">
-  <div class="custom-cursor" aria-hidden="true"></div>
+  <div class="custom-cursor target-cursor-wrapper" aria-hidden="true">
+    <div class="target-cursor-dot"></div>
+    <div class="target-cursor-corner corner-tl"></div>
+    <div class="target-cursor-corner corner-tr"></div>
+    <div class="target-cursor-corner corner-br"></div>
+    <div class="target-cursor-corner corner-bl"></div>
+  </div>
 
   <main class="visitor-shell">
     <div class="visitor-beam visitor-beam-purple" aria-hidden="true"></div>
@@ -72,6 +78,8 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script src="target-cursor.js" defer></script>
   <script src="visitor-card.js" defer></script>
 </body>
 </html>

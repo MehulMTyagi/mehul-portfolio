@@ -5,41 +5,6 @@ if (shouldResetScroll && 'scrollRestoration' in history) {
 	history.scrollRestoration = 'manual';
 }
 
-// --- CUSTOM GLOW CURSOR ---
-const customCursor = document.querySelector('.custom-cursor');
-const canUseCustomCursor = customCursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-if (canUseCustomCursor) {
-	let cursorX = window.innerWidth / 2;
-	let cursorY = window.innerHeight / 2;
-	let cursorTargetX = cursorX;
-	let cursorTargetY = cursorY;
-
-	const moveCursor = () => {
-		cursorX += (cursorTargetX - cursorX) * 0.28;
-		cursorY += (cursorTargetY - cursorY) * 0.28;
-		customCursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
-		requestAnimationFrame(moveCursor);
-	};
-
-	window.addEventListener('mousemove', (event) => {
-		cursorTargetX = event.clientX;
-		cursorTargetY = event.clientY;
-		customCursor.classList.add('is-visible');
-	});
-
-	document.addEventListener('mouseleave', () => {
-		customCursor.classList.remove('is-visible');
-	});
-
-	document.addEventListener('mouseover', (event) => {
-		const isInteractive = event.target.closest('a, button, input, textarea, select, [role="button"]');
-		customCursor.classList.toggle('is-hovering', Boolean(isInteractive));
-	});
-
-	moveCursor();
-}
-
 // --- HERO WORD SHOVE EFFECT ---
 const shoveContainers = document.querySelectorAll('[data-shove-text]');
 
@@ -47,6 +12,9 @@ if (shoveContainers.length > 0 && window.matchMedia('(hover: hover) and (pointer
 	const shoveWords = [];
 	const shoveRadius = 132;
 	const shoveStrength = 34;
+	const heroForShove = document.querySelector('.hero');
+	let pendingShoveEvent = null;
+	let shoveFrame = 0;
 
 	shoveContainers.forEach((container) => {
 		const words = container.textContent.trim().split(/\s+/);
@@ -87,14 +55,24 @@ if (shoveContainers.length > 0 && window.matchMedia('(hover: hover) and (pointer
 		});
 	};
 
+	const requestShoveUpdate = (event) => {
+		pendingShoveEvent = event;
+		if (shoveFrame) return;
+
+		shoveFrame = requestAnimationFrame(() => {
+			shoveFrame = 0;
+			if (pendingShoveEvent) updateShove(pendingShoveEvent);
+		});
+	};
+
 	const resetShove = () => {
 		shoveWords.forEach((word) => {
 			word.style.transform = 'translate3d(0, 0, 0)';
 		});
 	};
 
-	window.addEventListener('mousemove', updateShove);
-	document.querySelector('.hero')?.addEventListener('mouseleave', resetShove);
+	heroForShove?.addEventListener('mousemove', requestShoveUpdate, { passive: true });
+	heroForShove?.addEventListener('mouseleave', resetShove);
 }
 
 // --- BACKGROUND MUSIC INITIALIZATION ---
@@ -132,21 +110,32 @@ function startBGM() {
 }
 
 function removeBgmListeners() {
-	window.removeEventListener('click', startBGM);
+	window.removeEventListener('pointerdown', startBGM);
 	window.removeEventListener('keydown', startBGM);
-	window.removeEventListener('scroll', startBGM);
 }
 
-// 1. Try playing immediately on script load
-startBGM();
+// Browsers only allow audio reliably after a real user gesture.
+window.addEventListener('pointerdown', startBGM, { once: true });
+window.addEventListener('keydown', startBGM, { once: true });
 
-// 2. Try playing on window load (website fully loaded)
-window.addEventListener('load', startBGM);
+// --- SCROLL FPS GUARD ---
+let scrollFpsTimer = 0;
+let isScrollPerfMode = false;
 
-// 3. Fallbacks: Listen for user gestures (click, keydown, scroll) to unblock autoplay
-window.addEventListener('click', startBGM);
-window.addEventListener('keydown', startBGM);
-window.addEventListener('scroll', startBGM);
+function setScrollPerfMode(nextState) {
+	if (isScrollPerfMode === nextState) return;
+	isScrollPerfMode = nextState;
+	document.documentElement.classList.toggle('is-scrolling', nextState);
+	window.dispatchEvent(new CustomEvent('portfolio-scroll-state', {
+		detail: { scrolling: nextState }
+	}));
+}
+
+window.addEventListener('scroll', () => {
+	setScrollPerfMode(true);
+	clearTimeout(scrollFpsTimer);
+	scrollFpsTimer = setTimeout(() => setScrollPerfMode(false), 160);
+}, { passive: true });
 
 window.addEventListener('load', () => {
 	if (shouldResetScroll) {
@@ -169,6 +158,11 @@ window.addEventListener('load', () => {
 	}
 
 	gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
+	ScrollTrigger.config({
+		limitCallbacks: true,
+		ignoreMobileResize: true
+	});
+
 	if (shouldResetScroll) {
 		ScrollTrigger.clearScrollMemory('manual')
 	}
@@ -194,9 +188,11 @@ window.addEventListener('load', () => {
 						trigger: cards[index + 1],
 						start: 'top 85%',
 						end: 'top -75%',
-						scrub: true,
+						scrub: 0.2,
 						pin: card,
 						pinSpacing: false,
+						anticipatePin: 1,
+						fastScrollEnd: true
 					},
 				},
 			)
@@ -207,7 +203,8 @@ window.addEventListener('load', () => {
 					trigger: cards[index + 1],
 					start: 'top 75%',
 					end: 'top -25%',
-					scrub: true,
+					scrub: 0.2,
+					fastScrollEnd: true
 				},
 			})
 		}
@@ -249,9 +246,9 @@ window.addEventListener('load', () => {
 		];
 
 		function spawnStackLogo() {
-			if (!card1Visible) return;
+			if (!card1Visible || isScrollPerfMode) return;
 
-			const maxStackLogos = window.innerWidth <= 768 ? 10 : 18;
+			const maxStackLogos = window.innerWidth <= 768 ? 5 : 9;
 			const existingLogos = floatContainer.querySelectorAll('.floating-stack-logo');
 			if (existingLogos.length >= maxStackLogos) {
 				gsap.killTweensOf(existingLogos[0]);
@@ -275,7 +272,7 @@ window.addEventListener('load', () => {
 
 			floatContainer.appendChild(el);
 
-			const duration = 9 + Math.random() * 8;
+			const duration = 7 + Math.random() * 5;
 			gsap.fromTo(el, {
 				y: 0,
 				opacity: 0,
@@ -318,10 +315,10 @@ window.addEventListener('load', () => {
 				card1Visible = entry.isIntersecting;
 				if (entry.isIntersecting && !spawnInterval) {
 					// Initial burst
-					for (let i = 0; i < 6; i++) {
-						burstTimeouts.push(setTimeout(spawnStackLogo, i * 700));
+					for (let i = 0; i < 3; i++) {
+						burstTimeouts.push(setTimeout(spawnStackLogo, i * 900));
 					}
-					spawnInterval = setInterval(spawnStackLogo, 1500);
+					spawnInterval = setInterval(spawnStackLogo, 2800);
 				} else if (!entry.isIntersecting) {
 					clearStackLogoSpawns();
 				}
@@ -336,38 +333,35 @@ window.addEventListener('load', () => {
 
 	// --- HERO EYE TRACKING SCRIPT ---
 	const pupilLayers = document.querySelectorAll('.hero .layer-2');
-	let mouseTargetX = 0;
-	let mouseTargetY = 0;
-	let mouseX = 0;
-	let mouseY = 0;
+	if (pupilLayers.length > 0) {
+		let mouseTargetX = 0;
+		let mouseTargetY = 0;
+		let mouseX = 0;
+		let mouseY = 0;
 
-	window.addEventListener('mousemove', (e) => {
-		mouseTargetX = (e.clientX / window.innerWidth) * 2 - 1;
-		mouseTargetY = (e.clientY / window.innerHeight) * 2 - 1;
-	});
+		window.addEventListener('mousemove', (e) => {
+			mouseTargetX = (e.clientX / window.innerWidth) * 2 - 1;
+			mouseTargetY = (e.clientY / window.innerHeight) * 2 - 1;
+		});
 
-	window.addEventListener('touchmove', (e) => {
-		if (e.touches.length > 0) {
-			mouseTargetX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-			mouseTargetY = (e.touches[0].clientY / window.innerHeight) * 2 - 1;
-		}
-	});
+		window.addEventListener('touchmove', (e) => {
+			if (e.touches.length > 0) {
+				mouseTargetX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+				mouseTargetY = (e.touches[0].clientY / window.innerHeight) * 2 - 1;
+			}
+		});
 
-	function animateHero() {
-		// You previously changed this to 0.2 to match!
-		mouseX += (mouseTargetX - mouseX) * 0.2;
-		mouseY += (mouseTargetY - mouseY) * 0.2;
+		function animateHero() {
+			mouseX += (mouseTargetX - mouseX) * 0.2;
+			mouseY += (mouseTargetY - mouseY) * 0.2;
 
-		if (pupilLayers.length > 0) {
 			let currentPupilX = 0;
 
-			// Separate the boundaries for moving left vs moving right!
-			// If moving left is less smooth, adjusting the left offset below will fix it.
 			if (mouseX < 0) {
-				const pupilMaxOffsetLeft = 45; // Adjust this if the left movement clips or feels abrupt
+				const pupilMaxOffsetLeft = 45;
 				currentPupilX = mouseX * pupilMaxOffsetLeft;
 			} else {
-				const pupilMaxOffsetRight = 45; // Your previous max offset
+				const pupilMaxOffsetRight = 45;
 				currentPupilX = mouseX * pupilMaxOffsetRight;
 			}
 
@@ -377,15 +371,15 @@ window.addEventListener('load', () => {
 			pupilLayers.forEach((layer) => {
 				layer.style.transform = `translate3d(${currentPupilX}px, ${currentPupilY}px, 0)`;
 			});
+
+			requestAnimationFrame(animateHero);
 		}
-		requestAnimationFrame(animateHero);
+
+		pupilLayers.forEach((layer) => {
+			layer.style.transform = 'translate3d(0px, 0px, 0)';
+		});
+		animateHero();
 	}
-
-	pupilLayers.forEach((layer) => {
-		layer.style.transform = 'translate3d(0px, 0px, 0)';
-	});
-	animateHero();
-
 
 
 	// Helper to calculate absolute top offset of any element, bypassing position: sticky and transform shifts
@@ -569,7 +563,7 @@ window.addEventListener('load', () => {
 			}
 		);
 
-		const playhead = { position: 0 };
+		const playhead = { position: gsap.utils.wrap(0, loopHead.duration())(startTime) };
 		const positionWrap = gsap.utils.wrap(0, loopHead.duration());
 		const scrollToPosition = (position) => {
 			const snapPosition = gsap.utils.snap(1 / boxes.length)(position);
@@ -632,18 +626,7 @@ window.addEventListener('load', () => {
 			});
 		}
 
-		loopHead.totalTime(startTime);
-		gsap.to(playhead, {
-			scrollTrigger: {
-				trigger: card3,
-				start: 'top bottom',
-				end: 'bottom top',
-				scrub: 1
-			},
-			position: `+=${loopHead.duration() * 0.3}`,
-			ease: 'none',
-			onUpdate: () => loopHead.totalTime(positionWrap(playhead.position))
-		});
+		loopHead.totalTime(positionWrap(playhead.position));
 	}
 
 	requestAnimationFrame(() => {
