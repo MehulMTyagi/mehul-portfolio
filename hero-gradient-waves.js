@@ -23,7 +23,6 @@
 		lastFrame: 0,
 		visible: true,
 		pageVisible: !document.hidden,
-		scrolling: false,
 		mouseX: 0,
 		mouseY: 0,
 		targetMouseX: 0,
@@ -59,7 +58,7 @@
 		const step = Math.max(42, width / 28);
 
 		ctx.save();
-		ctx.filter = state.scrolling ? 'none' : `blur(${layer.blur}px)`;
+		ctx.filter = `blur(${layer.blur}px)`;
 		ctx.beginPath();
 		ctx.moveTo(-step, height + 80);
 
@@ -84,7 +83,7 @@
 	}
 
 	function draw(time, force) {
-		if (!force && time - state.lastFrame < (state.scrolling ? 90 : 48)) {
+		if (!force && time - state.lastFrame < 48) {
 			state.raf = requestAnimationFrame(draw);
 			return;
 		}
@@ -148,10 +147,6 @@
 		state.targetMouseX = 0;
 		state.targetMouseY = 0;
 	});
-
-	window.addEventListener('portfolio-scroll-state', (event) => {
-		state.scrolling = Boolean(event.detail?.scrolling);
-	}, { passive: true });
 
 	const intersectionObserver = new IntersectionObserver(([entry]) => {
 		state.visible = entry.isIntersecting;

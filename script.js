@@ -118,25 +118,6 @@ function removeBgmListeners() {
 window.addEventListener('pointerdown', startBGM, { once: true });
 window.addEventListener('keydown', startBGM, { once: true });
 
-// --- SCROLL FPS GUARD ---
-let scrollFpsTimer = 0;
-let isScrollPerfMode = false;
-
-function setScrollPerfMode(nextState) {
-	if (isScrollPerfMode === nextState) return;
-	isScrollPerfMode = nextState;
-	document.documentElement.classList.toggle('is-scrolling', nextState);
-	window.dispatchEvent(new CustomEvent('portfolio-scroll-state', {
-		detail: { scrolling: nextState }
-	}));
-}
-
-window.addEventListener('scroll', () => {
-	setScrollPerfMode(true);
-	clearTimeout(scrollFpsTimer);
-	scrollFpsTimer = setTimeout(() => setScrollPerfMode(false), 160);
-}, { passive: true });
-
 window.addEventListener('load', () => {
 	if (shouldResetScroll) {
 		window.scrollTo(0, 0);
@@ -167,51 +148,55 @@ window.addEventListener('load', () => {
 		ScrollTrigger.clearScrollMemory('manual')
 	}
 
-	const cards = gsap.utils.toArray('.card')
+	const desktopMotion = window.matchMedia('(min-width: 1024px)').matches;
 
-	cards.forEach((card, index) => {
-		if (index < cards.length - 1) {
-			const cardInner = card.querySelector('.card-inner')
+	if (desktopMotion) {
+		const cards = gsap.utils.toArray('.card')
 
-			gsap.fromTo(
-				cardInner,
-				{
-					y: '0%',
-					z: 0,
-					rotationX: 0,
-				},
-				{
-					y: '-50%',
-					z: -250,
-					rotationX: 45,
+		cards.forEach((card, index) => {
+			if (index < cards.length - 1) {
+				const cardInner = card.querySelector('.card-inner')
+
+				gsap.fromTo(
+					cardInner,
+					{
+						y: '0%',
+						z: 0,
+						rotationX: 0,
+					},
+					{
+						y: '-50%',
+						z: -250,
+						rotationX: 45,
+						scrollTrigger: {
+							trigger: cards[index + 1],
+							start: 'top 85%',
+							end: 'top -75%',
+							scrub: 0.2,
+							pin: card,
+							pinSpacing: false,
+							anticipatePin: 1,
+							fastScrollEnd: true
+						},
+					},
+				)
+
+				gsap.to(cardInner, {
+					'--after-opacity': 1,
 					scrollTrigger: {
 						trigger: cards[index + 1],
-						start: 'top 85%',
-						end: 'top -75%',
+						start: 'top 75%',
+						end: 'top -25%',
 						scrub: 0.2,
-						pin: card,
-						pinSpacing: false,
-						anticipatePin: 1,
 						fastScrollEnd: true
 					},
-				},
-			)
-
-			gsap.to(cardInner, {
-				'--after-opacity': 1,
-				scrollTrigger: {
-					trigger: cards[index + 1],
-					start: 'top 75%',
-					end: 'top -25%',
-					scrub: 0.2,
-					fastScrollEnd: true
-				},
-			})
-		}
-	})
+				})
+			}
+		})
+	}
 
 	// --- LAYER 4 FLOAT ANIMATION ---
-	if (document.querySelector('.hero .layer-4')) {
+	if (desktopMotion && document.querySelector('.hero .layer-4')) {
 		gsap.to('.hero .layer-4', {
 			yPercent: -3,   // Subtle float
 			ease: 'none',
@@ -246,9 +231,9 @@ window.addEventListener('load', () => {
 		];
 
 		function spawnStackLogo() {
-			if (!card1Visible || isScrollPerfMode) return;
+			if (!card1Visible) return;
 
-			const maxStackLogos = window.innerWidth <= 768 ? 5 : 9;
+			const maxStackLogos = window.innerWidth <= 768 ? 10 : 18;
 			const existingLogos = floatContainer.querySelectorAll('.floating-stack-logo');
 			if (existingLogos.length >= maxStackLogos) {
 				gsap.killTweensOf(existingLogos[0]);
@@ -272,7 +257,7 @@ window.addEventListener('load', () => {
 
 			floatContainer.appendChild(el);
 
-			const duration = 7 + Math.random() * 5;
+			const duration = 9 + Math.random() * 8;
 			gsap.fromTo(el, {
 				y: 0,
 				opacity: 0,
@@ -315,10 +300,10 @@ window.addEventListener('load', () => {
 				card1Visible = entry.isIntersecting;
 				if (entry.isIntersecting && !spawnInterval) {
 					// Initial burst
-					for (let i = 0; i < 3; i++) {
-						burstTimeouts.push(setTimeout(spawnStackLogo, i * 900));
+					for (let i = 0; i < 6; i++) {
+						burstTimeouts.push(setTimeout(spawnStackLogo, i * 700));
 					}
-					spawnInterval = setInterval(spawnStackLogo, 2800);
+					spawnInterval = setInterval(spawnStackLogo, 1500);
 				} else if (!entry.isIntersecting) {
 					clearStackLogoSpawns();
 				}
@@ -396,8 +381,15 @@ window.addEventListener('load', () => {
 	const glassNav = document.querySelector('.glass-nav');
 	const navHoverBg = document.querySelector('.nav-hover-bg');
 	const navLinks = document.querySelectorAll('.glass-nav a.nav-link');
+	const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
 
 	if (glassNav && navHoverBg && navLinks.length > 0) {
+		mobileMenuToggle?.addEventListener('click', () => {
+			const isOpen = glassNav.classList.toggle('is-open');
+			mobileMenuToggle.setAttribute('aria-expanded', String(isOpen));
+			mobileMenuToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+		});
+
 		navLinks.forEach(link => {
 			link.addEventListener('mouseenter', function () {
 				// Calculate position relative to the main nav container
@@ -426,14 +418,20 @@ window.addEventListener('load', () => {
 					this.classList.add('active');
 				}
 
+				glassNav.classList.remove('is-open');
+				mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+				mobileMenuToggle?.setAttribute('aria-label', 'Open navigation menu');
+
 				const targetId = this.getAttribute('href');
 				const targetEl = document.querySelector(targetId);
 				if (targetEl) {
-					const targetY = getAbsoluteOffsetTop(targetEl);
+					const targetY = desktopMotion
+						? getAbsoluteOffsetTop(targetEl)
+						: Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY);
 					
 					gsap.to(window, {
 						scrollTo: { y: targetY, autoKill: false },
-						duration: 1.5,
+						duration: desktopMotion ? 1.5 : 0.6,
 						ease: "power2.inOut"
 					});
 				}
@@ -500,7 +498,7 @@ window.addEventListener('load', () => {
 	const boxesContainer = card3?.querySelector(".boxes");
 	const boxes = gsap.utils.toArray('#card-3 .box');
 
-	if (card3 && boxesContainer && boxes.length > 0) {
+	if (desktopMotion && card3 && boxesContainer && boxes.length > 0) {
 		gsap.set(boxes, { yPercent: -50, display: 'block' });
 
 		const duration = 1;

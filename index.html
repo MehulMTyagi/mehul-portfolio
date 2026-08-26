@@ -113,6 +113,11 @@
     <!-- Navigation Bar -->
     <nav class="glass-nav glass-surface cursor-target">
       <div class="nav-hover-bg"></div>
+      <button class="mobile-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 7h14M5 12h14M5 17h14" />
+        </svg>
+      </button>
       <div class="nav-links left-links">
         <a href="#card-4" class="nav-link">Capabilities</a>
         <a href="#card-3" class="nav-link">Projects</a>
@@ -221,6 +226,43 @@
   <section class="sticky-cards">
     <div class="card" id="card-4">
       <div class="card-inner">
+        <section class="mobile-section mobile-capabilities" aria-labelledby="mobile-capabilities-title">
+          <div class="mobile-section-head">
+            <span>Capabilities</span>
+            <h2 id="mobile-capabilities-title">What I Can Build</h2>
+            <p>Focused skills shaped around practical BCA projects, product thinking, and working prototypes.</p>
+          </div>
+          <div class="mobile-capability-hero">
+            <img src="assets/capabilities/ai-ml.svg" loading="lazy" alt="AI and machine learning workflow illustration">
+            <div>
+              <span>Primary focus</span>
+              <strong>AI &amp; Machine Learning</strong>
+              <p>Python-first workflows for data preparation, model experiments, and prediction tools.</p>
+            </div>
+          </div>
+          <div class="mobile-capability-list" aria-label="Capability areas">
+            <article>
+              <span>01</span>
+              <h3>Web Development</h3>
+              <p>Responsive interfaces using HTML, CSS, JavaScript, and clean interaction patterns.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>App Development</h3>
+              <p>Mobile-first screens, feature prototypes, and usable flows for real student-facing tools.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>UI/UX Design</h3>
+              <p>Wireframes, visual hierarchy, spacing, and usability improvements for polished experiences.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Database Management</h3>
+              <p>Schema thinking, MySQL fundamentals, query writing, and backend-ready data structures.</p>
+            </article>
+          </div>
+        </section>
         <!-- Journal Scrapbook Flipbook -->
         <div class="flipbook-scene">
           <div class="flipbook" id="flipbook">
@@ -365,6 +407,68 @@
     </div>
     <div class="card" id="card-3">
       <div class="card-inner">
+        <section class="mobile-section mobile-projects" aria-labelledby="mobile-projects-title">
+          <div class="mobile-section-head">
+            <span>Projects</span>
+            <h2 id="mobile-projects-title">Selected Work</h2>
+            <p>Project snapshots rewritten for mobile scanning: goal first, then proof, then stack.</p>
+          </div>
+          <div class="mobile-project-list" aria-label="Selected projects">
+            <article class="mobile-project-card mobile-project-featured">
+              <img src="assets/projects/hybrid-intrusion-detection.png" loading="lazy" alt="Hybrid Intrusion Detection System dashboard screenshot">
+              <div class="mobile-project-copy">
+                <span>Industrial AI project</span>
+                <h3>Hybrid Intrusion Detection System</h3>
+                <p>Detects malicious network traffic, classifies attack types, scores anomalies, and stores high-risk alerts during live monitoring.</p>
+                <div class="mobile-project-stack">
+                  <small>Python</small>
+                  <small>Flask</small>
+                  <small>Scikit-learn</small>
+                  <small>Scapy</small>
+                </div>
+              </div>
+            </article>
+            <article class="mobile-project-card">
+              <img src="assets/projects/weather-wise.png" loading="lazy" alt="Weather Wise live weather and time website screenshot">
+              <div class="mobile-project-copy">
+                <span>Live utility website</span>
+                <h3>Weather Wise</h3>
+                <p>Live time and weather interface with city search, location context, and recent places.</p>
+                <div class="mobile-project-stack">
+                  <small>HTML</small>
+                  <small>CSS</small>
+                  <small>JavaScript</small>
+                </div>
+              </div>
+            </article>
+            <article class="mobile-project-card">
+              <img src="assets/projects/smart-recover.png" loading="lazy" alt="Smart Recover campus lost and found application screenshot">
+              <div class="mobile-project-copy">
+                <span>University web app</span>
+                <h3>Smart Recover</h3>
+                <p>Campus lost-and-found system with smart matching, claim approval, and office pickup flow.</p>
+                <div class="mobile-project-stack">
+                  <small>Python</small>
+                  <small>JavaScript</small>
+                  <small>SMTP</small>
+                </div>
+              </div>
+            </article>
+            <article class="mobile-project-card">
+              <img src="assets/projects/sneakers-ecommerce.png" loading="lazy" alt=".sneakers ecommerce website screenshot">
+              <div class="mobile-project-copy">
+                <span>Ecommerce concept</span>
+                <h3>.sneakers</h3>
+                <p>Online sneaker store concept with product sections, seasonal visuals, and an AI chatbot entry point.</p>
+                <div class="mobile-project-stack">
+                  <small>HTML</small>
+                  <small>CSS</small>
+                  <small>AI Chatbot</small>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
         <div class="glitch-title" data-text="PROJECTS">PROJECTS</div>
         <div class="boxes" aria-label="Projects carousel">
           <div class="box project-box" style="--card-accent: #64f28a;">
