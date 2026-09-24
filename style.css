@@ -2383,8 +2383,7 @@ body.preloader-active {
 }
 
 #card-3 .project-sticky-showcase {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 5;
   width: min(1480px, calc(100% - clamp(32px, 7vw, 120px)));
   height: 100svh;
@@ -2520,19 +2519,30 @@ body.preloader-active {
 
 @media (min-width: 1024px) {
   #card-3 {
-    height: 125svh;
+    height: 565svh;
+  }
+
+  #card-3 .card-inner {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   #card-3 .project-sticky-showcase {
-    display: none !important;
+    display: grid !important;
   }
 
   #card-3 .project-sticky-showcase + .glitch-title {
-    display: block !important;
+    display: none !important;
   }
 
   #card-3 .project-sticky-showcase ~ .boxes {
-    display: block !important;
+    display: none !important;
+  }
+
+  #card-3 .boxes {
+    display: none !important;
   }
 }
 

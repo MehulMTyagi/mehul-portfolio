@@ -76,8 +76,12 @@ function getScrollTargetY(targetId) {
 		const cardIndex = cardOrder.indexOf(targetId);
 
 		if (stickyCards && cardIndex >= 0) {
-			const cardStep = targetEl.offsetHeight || window.innerHeight;
-			return Math.max(0, stickyCards.offsetTop + cardIndex * cardStep);
+			const targetOffset = cardOrder.slice(0, cardIndex).reduce((offset, selector) => {
+				const card = document.querySelector(selector);
+				return offset + (card?.offsetHeight || window.innerHeight);
+			}, 0);
+			const innerOffset = targetId === '#card-3' ? Math.round(window.innerHeight * 0.82) : 0;
+			return Math.max(0, stickyCards.offsetTop + targetOffset + innerOffset);
 		}
 	}
 
@@ -688,17 +692,22 @@ window.addEventListener('load', () => {
 	const projectStickyCards = useStickyProjectCards ? gsap.utils.toArray('#card-3 .project-sticky-card') : [];
 
 	if (desktopMotion && card3 && projectStickyCards.length > 0) {
+		gsap.set(projectStickyCards, {
+			transformOrigin: '50% 42%',
+			willChange: 'transform'
+		});
 		gsap.set(projectStickyCards[0], { yPercent: 0, scale: 1, rotation: 0 });
 		projectStickyCards.slice(1).forEach(card => {
-			gsap.set(card, { yPercent: 108, scale: 1, rotation: 0 });
+			gsap.set(card, { yPercent: 104, scale: 1, rotation: 0 });
 		});
 
 		const projectTimeline = gsap.timeline({
 			scrollTrigger: {
 				trigger: card3,
-				start: 'top top',
-				end: 'bottom bottom',
-				scrub: 0.45,
+				start: 'top -82%',
+				end: () => `+=${window.innerHeight * (projectStickyCards.length - 1)}`,
+				scrub: true,
+				invalidateOnRefresh: true,
 				fastScrollEnd: true
 			}
 		});
