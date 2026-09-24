@@ -2518,6 +2518,24 @@ body.preloader-active {
   display: none !important;
 }
 
+@media (min-width: 1024px) {
+  #card-3 {
+    height: 125svh;
+  }
+
+  #card-3 .project-sticky-showcase {
+    display: none !important;
+  }
+
+  #card-3 .project-sticky-showcase + .glitch-title {
+    display: block !important;
+  }
+
+  #card-3 .project-sticky-showcase ~ .boxes {
+    display: block !important;
+  }
+}
+
 #card-3 .card-inner::before {
   content: '';
   position: absolute;

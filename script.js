@@ -65,6 +65,70 @@ if (shouldResetScroll && 'scrollRestoration' in history) {
 	};
 })();
 
+function getScrollTargetY(targetId) {
+	const targetEl = document.querySelector(targetId);
+	if (!targetEl) return null;
+	if (targetId === '#hero-section') return 0;
+
+	if (window.matchMedia('(min-width: 1024px)').matches && targetEl.classList.contains('card')) {
+		const stickyCards = document.querySelector('.sticky-cards');
+		const cardOrder = ['#card-4', '#card-3', '#card-upgrade', '#card-1'];
+		const cardIndex = cardOrder.indexOf(targetId);
+
+		if (stickyCards && cardIndex >= 0) {
+			const cardStep = targetEl.offsetHeight || window.innerHeight;
+			return Math.max(0, stickyCards.offsetTop + cardIndex * cardStep);
+		}
+	}
+
+	if (targetId === '#about') {
+		return Math.max(0, targetEl.offsetTop);
+	}
+
+	return Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY);
+}
+
+function setupReliableNavigation() {
+	const glassNav = document.querySelector('.glass-nav');
+	if (!glassNav || glassNav.dataset.navReady === 'true') return;
+
+	glassNav.dataset.navReady = 'true';
+
+	glassNav.addEventListener('click', (event) => {
+		const link = event.target.closest('a[href]');
+		if (!link || !glassNav.contains(link)) return;
+
+		const url = new URL(link.getAttribute('href'), window.location.href);
+		const samePage = url.origin === window.location.origin && url.pathname === window.location.pathname;
+
+		if (!url.hash || !samePage) return;
+
+		const targetY = getScrollTargetY(url.hash);
+		if (targetY === null) return;
+
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const navLinks = glassNav.querySelectorAll('.nav-link');
+		if (link.classList.contains('nav-link')) {
+			navLinks.forEach(nav => nav.classList.remove('active'));
+			link.classList.add('active');
+		}
+
+		glassNav.classList.remove('is-open');
+		const mobileMenuToggle = glassNav.querySelector('.mobile-menu-toggle');
+		mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+		mobileMenuToggle?.setAttribute('aria-label', 'Open navigation menu');
+
+		window.scrollTo({
+			top: targetY,
+			behavior: 'smooth'
+		});
+	}, true);
+}
+
+document.addEventListener('DOMContentLoaded', setupReliableNavigation, { once: true });
+
 // --- HERO WORD SHOVE EFFECT ---
 const shoveContainers = document.querySelectorAll('[data-shove-text]');
 
@@ -485,11 +549,8 @@ window.addEventListener('load', () => {
 				const targetId = this.getAttribute('href');
 				const targetEl = document.querySelector(targetId);
 				if (targetEl) {
-					const targetY = targetId === '#hero-section'
-						? 0
-						: desktopMotion
-						? getAbsoluteOffsetTop(targetEl)
-						: Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY);
+					const targetY = getScrollTargetY(targetId);
+					if (targetY === null) return;
 
 					gsap.killTweensOf(window);
 					gsap.to(window, {
@@ -620,7 +681,11 @@ window.addEventListener('load', () => {
 
 	// --- INFINITE COVER FLOW FOR CARD-3 ---
 	const card3 = document.querySelector("#card-3");
-	const projectStickyCards = gsap.utils.toArray('#card-3 .project-sticky-card');
+	const projectStickyShowcase = card3?.querySelector('.project-sticky-showcase');
+	const useStickyProjectCards = desktopMotion
+		&& projectStickyShowcase
+		&& window.getComputedStyle(projectStickyShowcase).display !== 'none';
+	const projectStickyCards = useStickyProjectCards ? gsap.utils.toArray('#card-3 .project-sticky-card') : [];
 
 	if (desktopMotion && card3 && projectStickyCards.length > 0) {
 		gsap.set(projectStickyCards[0], { yPercent: 0, scale: 1, rotation: 0 });
