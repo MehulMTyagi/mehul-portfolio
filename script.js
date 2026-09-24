@@ -470,10 +470,13 @@ window.addEventListener('load', () => {
 
 		flipbook.addEventListener('click', function (e) {
 			const rect = flipbook.getBoundingClientRect();
-			const clickX = e.clientX - rect.left;
-			const half = rect.width / 2;
+			const isOpenSpread = currentFlipped > 0 && currentFlipped < totalLeaves;
+			const spineX = rect.left;
+			const isForwardClick = isOpenSpread
+				? e.clientX >= spineX
+				: e.clientX > rect.left + rect.width / 2;
 
-			if (clickX > half) {
+			if (isForwardClick) {
 				// Click right side → flip forward
 				if (currentFlipped < totalLeaves) {
 					leaves[currentFlipped].classList.add('flipped');
