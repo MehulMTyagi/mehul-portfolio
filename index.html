@@ -28,9 +28,9 @@
   <!-- Preload removed to save bandwidth - image loads on scroll via lazy loading -->
 
   <!-- Connected Styles -->
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="visitor-card.css" />
-  <link rel="stylesheet" href="upgrades/upgrades.css" />
+  <link rel="stylesheet" href="style.css?v=20260924" />
+  <link rel="stylesheet" href="visitor-card.css?v=20260924" />
+  <link rel="stylesheet" href="upgrades/upgrades.css?v=20260924" />
 
 </head>
 
@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <section class="visitor-entry-modal is-open" id="visitorEntryModal" aria-label="Create your visitor card" aria-hidden="false">
+  <section class="visitor-entry-modal" id="visitorEntryModal" aria-label="Create your visitor card" aria-hidden="true">
     <div class="visitor-entry-backdrop" data-visitor-close></div>
     <button type="button" class="visitor-entry-back" data-visitor-close aria-label="Close visitor card editor">Back</button>
     <a class="visitor-entry-info" href="visitor-card.html" aria-label="Open visitor gallery">i</a>
@@ -122,7 +122,7 @@
         <a href="#card-4" class="nav-link">Capabilities</a>
         <a href="#card-3" class="nav-link">Projects</a>
       </div>
-      <a href="#about" class="nav-logo">
+      <a href="index.html?skipVisitor=1#hero-section" class="nav-logo">
         <img src="assets/icons/preloader-nav.webp" alt="Logo" width="48" height="48">
       </a>
       <div class="nav-links right-links">
@@ -137,6 +137,17 @@
       Resume
     </a>
   </header>
+
+  <aside class="scroll-storybar" aria-hidden="true">
+    <div class="scroll-storybar-card">
+      <span id="scrollStoryIndex">01</span>
+      <strong id="scrollStoryTitle">Intro Hero</strong>
+    </div>
+    <div class="scroll-storybar-track">
+      <span class="scroll-storybar-fill"></span>
+      <span class="scroll-storybar-thumb"></span>
+    </div>
+  </aside>
 
   <section class="hero" id="hero-section">
     <div class="hero-gradient-waves" data-gradient-waves aria-hidden="true"></div>
@@ -183,7 +194,7 @@
     </div>
   </section>
 
-  <section class="intermediate-container">
+  <section class="intermediate-container" id="i-can-section">
     <div class="list-container">
       <p class="list-text">I can</p>
 
@@ -465,6 +476,47 @@
                   <small>CSS</small>
                   <small>AI Chatbot</small>
                 </div>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="project-sticky-showcase" aria-labelledby="project-sticky-title">
+          <div class="project-sticky-copy">
+            <span>Selected work</span>
+            <h2 id="project-sticky-title">Project demos</h2>
+            <p>Scroll through the systems, dashboards, and product interfaces I have built across AI, web, utility, and ecommerce work.</p>
+          </div>
+          <div class="project-sticky-stage" aria-label="Project screenshots">
+            <article class="project-sticky-card" style="--card-accent: #64f28a;">
+              <img src="assets/projects/hybrid-intrusion-detection.png" loading="lazy" alt="Hybrid Intrusion Detection System dashboard screenshot">
+              <div class="project-sticky-caption">
+                <span>Industrial AI project</span>
+                <h3>Hybrid Intrusion Detection System</h3>
+                <p>Network traffic detection, attack classification, risk scoring, and live Flask monitoring.</p>
+              </div>
+            </article>
+            <article class="project-sticky-card" style="--card-accent: #22d3ee;">
+              <img src="assets/projects/weather-wise.png" loading="lazy" alt="Weather Wise live weather and time website screenshot">
+              <div class="project-sticky-caption">
+                <span>Live utility website</span>
+                <h3>Weather Wise</h3>
+                <p>Live time and weather interface with search, location context, and recent places.</p>
+              </div>
+            </article>
+            <article class="project-sticky-card" style="--card-accent: #2dd4bf;">
+              <img src="assets/projects/smart-recover.png" loading="lazy" alt="Smart Recover campus lost and found application screenshot">
+              <div class="project-sticky-caption">
+                <span>University web app</span>
+                <h3>Smart Recover</h3>
+                <p>Lost-and-found workflow with smart matching, claim approvals, and pickup routing.</p>
+              </div>
+            </article>
+            <article class="project-sticky-card" style="--card-accent: #34d399;">
+              <img src="assets/projects/sneakers-ecommerce.png" loading="lazy" alt=".sneakers ecommerce website screenshot">
+              <div class="project-sticky-caption">
+                <span>Ecommerce concept</span>
+                <h3>.sneakers</h3>
+                <p>Online sneaker storefront with product sections, seasonal visuals, and AI chatbot entry.</p>
               </div>
             </article>
           </div>
@@ -955,11 +1007,11 @@
   <!-- split-type removed: loaded but never used in any script -->
 
   <!-- Connected script -->
-  <script src="target-cursor.js" defer></script>
-  <script src="hero-gradient-waves.js" defer></script>
-  <script src="visitor-card.js" defer></script>
-  <script src="upgrades/upgrades.js" defer></script>
-  <script src="script.js" defer></script>
+  <script src="target-cursor.js?v=20260924" defer></script>
+  <script src="hero-gradient-waves.js?v=20260924" defer></script>
+  <script src="visitor-card.js?v=20260924" defer></script>
+  <script src="upgrades/upgrades.js?v=20260924" defer></script>
+  <script src="script.js?v=20260924" defer></script>
 </body>
 
 </html>

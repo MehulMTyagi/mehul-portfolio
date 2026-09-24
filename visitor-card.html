@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="icon" type="image/webp" href="assets/icons/preloader-nav.webp">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="visitor-card.css">
+  <link rel="stylesheet" href="style.css?v=20260924">
+  <link rel="stylesheet" href="visitor-card.css?v=20260924">
 </head>
 <body class="visitor-page">
   <div class="custom-cursor target-cursor-wrapper" aria-hidden="true">
@@ -26,11 +26,11 @@
     <div class="visitor-beam visitor-beam-green" aria-hidden="true"></div>
 
     <nav class="visitor-nav" aria-label="Visitor card navigation">
-      <a class="visitor-back-link" href="index.html">Back to portfolio</a>
+      <a class="visitor-back-link" href="index.html?skipVisitor=1#hero-section">Back to portfolio</a>
       <div class="visitor-nav-actions">
         <span id="visitorGuestCount">Syncing visitors</span>
         <button type="button" id="visitorShuffleCards">Shuffle</button>
-        <a href="index.html" class="visitor-nav-button">Create on entry</a>
+        <a href="index.html?visitor=1" class="visitor-nav-button">Create on entry</a>
       </div>
     </nav>
 
@@ -45,14 +45,14 @@
     <section class="visitor-gallery-panel" aria-label="Visitor gallery">
       <div class="visitor-gallery-header">
         <div>
-          <span class="visitor-kicker">Live local gallery</span>
+        <span class="visitor-kicker">Live visitor gallery</span>
           <h2>Visitor Cards</h2>
         </div>
         <strong id="visitorTotalStat">0 cards</strong>
       </div>
 
       <details class="visitor-stats" open>
-        <summary>Stats for this browser</summary>
+        <summary>Stats</summary>
         <div class="visitor-stats-body">
           <div class="visitor-chart" aria-hidden="true">
             <svg viewBox="0 0 640 120" preserveAspectRatio="none">
@@ -79,7 +79,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
-  <script src="target-cursor.js" defer></script>
-  <script src="visitor-card.js" defer></script>
+  <script src="target-cursor.js?v=20260924" defer></script>
+  <script src="visitor-card.js?v=20260924" defer></script>
 </body>
 </html>

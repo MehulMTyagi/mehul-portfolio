@@ -139,6 +139,25 @@ function createDraft(source = {}) {
 	};
 }
 
+function shouldShowEntryModal() {
+	if (!dom.entryModal) return false;
+
+	const params = new URLSearchParams(window.location.search);
+	if (params.get('visitor') === '1') return true;
+	if (params.get('skipVisitor') === '1') return false;
+	if (window.location.hash) return false;
+
+	return true;
+}
+
+function syncEntryModalState() {
+	if (!dom.entryModal) return;
+	const isOpen = shouldShowEntryModal();
+	dom.entryModal.classList.toggle('is-open', isOpen);
+	dom.entryModal.setAttribute('aria-hidden', String(!isOpen));
+	document.body.classList.toggle('visitor-modal-open', isOpen);
+}
+
 function readCards() {
 	if (Array.isArray(backendCards)) return backendCards;
 	return readLocalCards();
@@ -515,7 +534,9 @@ function renderStats(cards = readCards()) {
 	const latest = cards.reduce((max, card) => Math.max(max, Number(card.createdAt || 0)), 0);
 
 	if (dom.guestCount) {
-		dom.guestCount.textContent = backendConfigured ? `${BASE_GUEST_COUNT + total} visitors` : `${BASE_GUEST_COUNT + total} saved locally`;
+		dom.guestCount.textContent = backendConfigured
+			? `${total} visitor card${total === 1 ? '' : 's'}`
+			: `${total} local card${total === 1 ? '' : 's'}`;
 	}
 
 	if (dom.totalStat) {
@@ -695,8 +716,10 @@ function closeEntryModal() {
 	if (!dom.entryModal) return;
 	dom.entryModal.classList.remove('is-open');
 	dom.entryModal.setAttribute('aria-hidden', 'true');
+	document.body.classList.remove('visitor-modal-open');
 }
 
+syncEntryModalState();
 loadCurrentDraft();
 bindEvents();
 renderAll();

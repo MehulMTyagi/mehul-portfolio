@@ -5,6 +5,66 @@ if (shouldResetScroll && 'scrollRestoration' in history) {
 	history.scrollRestoration = 'manual';
 }
 
+(() => {
+	if (typeof window.gsap !== 'undefined') return;
+
+	const timelineStub = {
+		to() { return this; },
+		fromTo() { return this; },
+		set() { return this; },
+		add() { return this; },
+		kill() { return this; },
+		totalTime() { return this; },
+		duration() { return 1; }
+	};
+
+	window.ScrollTrigger = window.ScrollTrigger || {
+		config() {},
+		clearScrollMemory() {},
+		refresh() {},
+		getAll() { return []; }
+	};
+
+	window.gsap = {
+		registerPlugin() {},
+		set() {},
+		killTweensOf() {},
+		timeline() {
+			return { ...timelineStub };
+		},
+		fromTo() {
+			return { ...timelineStub };
+		},
+		to(target, vars = {}) {
+			if (target === window && vars.scrollTo) {
+				const y = typeof vars.scrollTo === 'number' ? vars.scrollTo : vars.scrollTo.y;
+				window.scrollTo({
+					top: Number(y) || 0,
+					behavior: vars.duration === 0 ? 'auto' : 'smooth'
+				});
+			}
+			if (typeof vars.onUpdate === 'function') vars.onUpdate();
+			if (typeof vars.onComplete === 'function') vars.onComplete();
+			return { ...timelineStub };
+		},
+		utils: {
+			toArray(value) {
+				return typeof value === 'string' ? Array.from(document.querySelectorAll(value)) : Array.from(value || []);
+			},
+			wrap(min, max, value) {
+				const wrapValue = (input) => {
+					const range = max - min;
+					return ((((input - min) % range) + range) % range) + min;
+				};
+				return value === undefined ? wrapValue : wrapValue(value);
+			},
+			snap(increment) {
+				return (value) => Math.round(value / increment) * increment;
+			}
+		}
+	};
+})();
+
 // --- HERO WORD SHOVE EFFECT ---
 const shoveContainers = document.querySelectorAll('[data-shove-text]');
 
@@ -138,7 +198,7 @@ window.addEventListener('load', () => {
 		}, 600); // Wait for the 0.6s zoom out animation
 	}
 
-	gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
+	gsap.registerPlugin(...[window.ScrollTrigger, window.ScrollToPlugin].filter(Boolean))
 	ScrollTrigger.config({
 		limitCallbacks: true,
 		ignoreMobileResize: true
@@ -425,14 +485,18 @@ window.addEventListener('load', () => {
 				const targetId = this.getAttribute('href');
 				const targetEl = document.querySelector(targetId);
 				if (targetEl) {
-					const targetY = desktopMotion
+					const targetY = targetId === '#hero-section'
+						? 0
+						: desktopMotion
 						? getAbsoluteOffsetTop(targetEl)
 						: Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY);
-					
+
+					gsap.killTweensOf(window);
 					gsap.to(window, {
-						scrollTo: { y: targetY, autoKill: false },
-						duration: desktopMotion ? 1.5 : 0.6,
-						ease: "power2.inOut"
+						scrollTo: { y: targetY, autoKill: true },
+						duration: targetId === '#hero-section' ? 0.35 : (desktopMotion ? 0.65 : 0.38),
+						ease: "power3.out",
+						overwrite: true
 					});
 				}
 			});
@@ -441,6 +505,64 @@ window.addEventListener('load', () => {
 		glassNav.addEventListener('mouseleave', function () {
 			navHoverBg.style.opacity = '0';
 		});
+	}
+
+	// --- SCROLL STORYBAR ---
+	const storybar = document.querySelector('.scroll-storybar');
+	const storyFill = document.querySelector('.scroll-storybar-fill');
+	const storyThumb = document.querySelector('.scroll-storybar-thumb');
+	const storyIndex = document.getElementById('scrollStoryIndex');
+	const storyTitle = document.getElementById('scrollStoryTitle');
+	const storySections = [
+		{ id: 'hero-section', index: '01', title: 'Intro Hero' },
+		{ id: 'i-can-section', index: '02', title: 'I can' },
+		{ id: 'card-4', index: '03', title: 'Capabilities' },
+		{ id: 'card-3', index: '04', title: 'Projects' },
+		{ id: 'card-upgrade', index: '05', title: 'Education' },
+		{ id: 'card-1', index: '06', title: 'Stack' },
+		{ id: 'about', index: '07', title: 'Contact' }
+	]
+		.map(section => ({ ...section, el: document.getElementById(section.id) }))
+		.filter(section => section.el);
+
+	if (storybar && storyFill && storyThumb && storySections.length) {
+		let storyRaf = 0;
+		let activeStoryId = '';
+
+		const updateStorybar = () => {
+			storyRaf = 0;
+			const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+			const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+			storybar.style.setProperty('--scroll-progress', progress.toFixed(4));
+			storyFill.style.transform = `scaleY(${progress})`;
+			storyThumb.style.transform = `translate3d(-50%, calc(${(progress * 100).toFixed(2)}% - 50%), 0)`;
+
+			let active = storySections[0];
+			const threshold = window.innerHeight * 0.46;
+			storySections.forEach(section => {
+				if (section.el.getBoundingClientRect().top <= threshold) {
+					active = section;
+				}
+			});
+
+			if (active && active.id !== activeStoryId) {
+				activeStoryId = active.id;
+				if (storyIndex) storyIndex.textContent = active.index;
+				if (storyTitle) storyTitle.textContent = active.title;
+				storybar.classList.remove('is-popping');
+				void storybar.offsetWidth;
+				storybar.classList.add('is-popping');
+			}
+		};
+
+		const requestStorybarUpdate = () => {
+			if (storyRaf) return;
+			storyRaf = requestAnimationFrame(updateStorybar);
+		};
+
+		updateStorybar();
+		window.addEventListener('scroll', requestStorybarUpdate, { passive: true });
+		window.addEventListener('resize', requestStorybarUpdate);
 	}
 
 	// --- FLIPBOOK PAGE FLIP SCRIPT ---
@@ -498,10 +620,47 @@ window.addEventListener('load', () => {
 
 	// --- INFINITE COVER FLOW FOR CARD-3 ---
 	const card3 = document.querySelector("#card-3");
+	const projectStickyCards = gsap.utils.toArray('#card-3 .project-sticky-card');
+
+	if (desktopMotion && card3 && projectStickyCards.length > 0) {
+		gsap.set(projectStickyCards[0], { yPercent: 0, scale: 1, rotation: 0 });
+		projectStickyCards.slice(1).forEach(card => {
+			gsap.set(card, { yPercent: 108, scale: 1, rotation: 0 });
+		});
+
+		const projectTimeline = gsap.timeline({
+			scrollTrigger: {
+				trigger: card3,
+				start: 'top top',
+				end: 'bottom bottom',
+				scrub: 0.45,
+				fastScrollEnd: true
+			}
+		});
+
+		for (let i = 0; i < projectStickyCards.length - 1; i += 1) {
+			const currentCard = projectStickyCards[i];
+			const nextCard = projectStickyCards[i + 1];
+
+			projectTimeline
+				.to(currentCard, {
+					scale: 0.7,
+					rotation: 5,
+					duration: 1,
+					ease: 'none'
+				}, i)
+				.to(nextCard, {
+					yPercent: 0,
+					duration: 1,
+					ease: 'none'
+				}, i);
+		}
+	}
+
 	const boxesContainer = card3?.querySelector(".boxes");
 	const boxes = gsap.utils.toArray('#card-3 .box');
 
-	if (desktopMotion && card3 && boxesContainer && boxes.length > 0) {
+	if (desktopMotion && !projectStickyCards.length && card3 && boxesContainer && boxes.length > 0) {
 		gsap.set(boxes, { yPercent: -50, display: 'block' });
 
 		const duration = 1;

@@ -248,7 +248,7 @@ function buildStats(cards) {
 
 	return {
 		total,
-		guestCount: BASE_GUEST_COUNT + total,
+		guestCount: total,
 		signedPercent: total ? Math.round((signed / total) * 100) : 0,
 		latest,
 		colors
