@@ -574,6 +574,7 @@ window.addEventListener('load', () => {
 
 	// --- SCROLL STORYBAR ---
 	const storybar = document.querySelector('.scroll-storybar');
+	const storyTrack = document.querySelector('.scroll-storybar-track');
 	const storyFill = document.querySelector('.scroll-storybar-fill');
 	const storyThumb = document.querySelector('.scroll-storybar-thumb');
 	const storyIndex = document.getElementById('scrollStoryIndex');
@@ -590,17 +591,24 @@ window.addEventListener('load', () => {
 		.map(section => ({ ...section, el: document.getElementById(section.id) }))
 		.filter(section => section.el);
 
-	if (storybar && storyFill && storyThumb && storySections.length) {
+	if (storybar && storyTrack && storyFill && storyThumb && storySections.length) {
 		let storyRaf = 0;
 		let activeStoryId = '';
+		let storyTrackHeight = storyTrack.getBoundingClientRect().height;
+
+		const updateStorybarMetrics = () => {
+			storyTrackHeight = storyTrack.getBoundingClientRect().height;
+		};
 
 		const updateStorybar = () => {
 			storyRaf = 0;
+			updateStorybarMetrics();
 			const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
 			const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+			const thumbY = progress * storyTrackHeight;
 			storybar.style.setProperty('--scroll-progress', progress.toFixed(4));
 			storyFill.style.transform = `scaleY(${progress})`;
-			storyThumb.style.transform = `translate3d(-50%, calc(${(progress * 100).toFixed(2)}% - 50%), 0)`;
+			storyThumb.style.transform = `translate3d(-50%, calc(${thumbY.toFixed(2)}px - 50%), 0)`;
 
 			let active = storySections[0];
 			const threshold = window.innerHeight * 0.46;
@@ -627,7 +635,10 @@ window.addEventListener('load', () => {
 
 		updateStorybar();
 		window.addEventListener('scroll', requestStorybarUpdate, { passive: true });
-		window.addEventListener('resize', requestStorybarUpdate);
+		window.addEventListener('resize', () => {
+			updateStorybarMetrics();
+			requestStorybarUpdate();
+		});
 	}
 
 	// --- FLIPBOOK PAGE FLIP SCRIPT ---
