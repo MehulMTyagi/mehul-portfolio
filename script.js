@@ -355,8 +355,26 @@ window.addEventListener('load', () => {
 			{ icon: "assets/stack/github.png", label: "GitHub", color: "#f8fafc" },
 			{ icon: "assets/stack/firebase.png", label: "Firebase", color: "#ffca28" },
 			{ icon: "assets/stack/mysql.png", label: "MySQL", color: "#00758f" },
-			{ icon: "assets/stack/git.png", label: "Git", color: "#f05032" }
+			{ icon: "assets/stack/git.png", label: "Git", color: "#f05032" },
+			{ icon: "assets/stack/flask.svg", label: "Flask", color: "#d9e8ec" },
+			{ icon: "assets/stack/numpy.svg", label: "NumPy", color: "#4dabcf" },
+			{ icon: "assets/stack/pandas.svg", label: "Pandas", color: "#b59cf2" },
+			{ icon: "assets/stack/scikitlearn.svg", label: "Scikit-learn", color: "#f89939" },
+			{ icon: "assets/stack/matplotlib.svg", label: "Matplotlib", color: "#f1c84a" },
+			{ icon: "assets/stack/jira.svg", label: "Jira", color: "#2684ff" }
 		];
+		let stackQueue = [];
+
+		function nextStackItem() {
+			if (!stackQueue.length) {
+				stackQueue = [...stackItems];
+				for (let i = stackQueue.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[stackQueue[i], stackQueue[j]] = [stackQueue[j], stackQueue[i]];
+				}
+			}
+			return stackQueue.pop();
+		}
 
 		function spawnStackLogo() {
 			if (!card1Visible) return;
@@ -368,7 +386,7 @@ window.addEventListener('load', () => {
 				existingLogos[0].remove();
 			}
 
-			const tech = stackItems[Math.floor(Math.random() * stackItems.length)];
+			const tech = nextStackItem();
 			const el = document.createElement('div');
 			el.className = 'floating-stack-logo';
 			el.style.setProperty('--stack-color', tech.color);
