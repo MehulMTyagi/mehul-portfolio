@@ -7,7 +7,7 @@ const vm = require('node:vm');
 
 const root = join(__dirname, '..');
 
-function loadClient({ cards, currentId, currentToken, search = '' }) {
+function loadClient({ cards, currentId, currentToken, search = '', hash = '', withModal = false }) {
 	const values = new Map([['mehul-visitor-cards-v2', JSON.stringify(cards)]]);
 	if (currentId) values.set('mehul-visitor-current-card-id', currentId);
 	if (currentToken) values.set('mehul-visitor-current-card-token', currentToken);
@@ -20,7 +20,9 @@ function loadClient({ cards, currentId, currentToken, search = '' }) {
 		console: { warn() {} },
 		document: {
 			body: { classList: { toggle() {}, remove() {} } },
-			getElementById: () => null,
+			getElementById: id => withModal && id === 'visitorEntryModal'
+				? { classList: { toggle() {} }, setAttribute() {} }
+				: null,
 			querySelectorAll: () => []
 		},
 		fetch: async () => { throw new Error('offline'); },
@@ -28,11 +30,13 @@ function loadClient({ cards, currentId, currentToken, search = '' }) {
 		URLSearchParams,
 		window: {
 			crypto: { randomUUID: () => 'fresh-id' },
-			location: { search, hash: '' }
+			location: { search, hash }
 		}
 	});
 	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), context);
-	return JSON.parse(JSON.stringify(vm.runInContext('({ id: state.id, editingCard })', context)));
+	const result = JSON.parse(JSON.stringify(vm.runInContext('({ id: state.id, editingCard })', context)));
+	if (withModal) result.modalOpen = vm.runInContext('shouldShowEntryModal()', context);
+	return result;
 }
 
 function loadApi() {
@@ -72,6 +76,17 @@ test('a new browser never adopts the first public gallery card', () => {
 	assert.deepEqual(loadClient({ cards, currentId: 'anusha-card' }), { id: 'fresh-id', editingCard: false });
 	assert.deepEqual(loadClient({ cards, currentId: 'anusha-card', search: '?editVisitor=1' }), { id: 'fresh-id', editingCard: false });
 	assert.deepEqual(loadClient({ cards, currentId: 'anusha-card', currentToken: 'secret', search: '?editVisitor=1' }), { id: 'anusha-card', editingCard: true });
+});
+
+test('the entry modal opens only for new visitors or explicit create and edit links', () => {
+	const cards = [{ id: 'my-card', name: 'Mehul', color: 'onyx', pattern: 'monogram' }];
+	assert.equal(loadClient({ cards: [], withModal: true }).modalOpen, true);
+	assert.equal(loadClient({ cards, currentId: 'my-card', currentToken: 'secret', withModal: true }).modalOpen, false);
+	assert.equal(loadClient({ cards, currentId: 'my-card', withModal: true }).modalOpen, false);
+	assert.equal(loadClient({ cards, currentId: 'my-card', search: '?visitor=1', withModal: true }).modalOpen, true);
+	assert.equal(loadClient({ cards, currentId: 'my-card', currentToken: 'secret', search: '?editVisitor=1', withModal: true }).modalOpen, true);
+	assert.equal(loadClient({ cards: [], search: '?skipVisitor=1', withModal: true }).modalOpen, false);
+	assert.equal(loadClient({ cards: [], hash: '#hero-section', withModal: true }).modalOpen, false);
 });
 
 test('creates always get new server IDs while explicit edits retain the original card', async () => {

@@ -147,10 +147,12 @@ function shouldShowEntryModal() {
 
 	const params = new URLSearchParams(window.location.search);
 	if (params.get('visitor') === '1') return true;
+	if (params.get('editVisitor') === '1') return true;
 	if (params.get('skipVisitor') === '1') return false;
 	if (window.location.hash) return false;
 
-	return true;
+	migrateLegacyCard();
+	return !localStorage.getItem(CURRENT_ID_KEY);
 }
 
 function syncEntryModalState() {
