@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'mehul-visitor-cards-v2';
 const LEGACY_KEY = 'mehul-visitor-card';
 const CURRENT_ID_KEY = 'mehul-visitor-current-card-id';
+const CURRENT_TOKEN_KEY = 'mehul-visitor-current-card-token';
 const API_URL = '/api/visitor-cards';
 const BASE_GUEST_COUNT = 1000;
 
@@ -117,6 +118,7 @@ const dom = {
 let state = createDraft();
 let backendCards = null;
 let backendConfigured = false;
+let editingCard = false;
 
 function createId() {
 	if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -219,6 +221,8 @@ async function saveDraft() {
 		backendConfigured = true;
 		writeCards(backendCards);
 		localStorage.setItem(CURRENT_ID_KEY, backendResult.card.id);
+		if (backendResult.ownerToken) localStorage.setItem(CURRENT_TOKEN_KEY, backendResult.ownerToken);
+		editingCard = true;
 		state = createDraft(backendResult.card);
 		syncInputs();
 		renderAll();
@@ -226,10 +230,16 @@ async function saveDraft() {
 		document.querySelector('.visitor-gallery-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		return;
 	}
+	if (backendConfigured) {
+		if (dom.saveButton) dom.saveButton.disabled = false;
+		return;
+	}
 
 	const localResult = upsertLocalCard(state);
 	writeCards(localResult.cards);
 	localStorage.setItem(CURRENT_ID_KEY, localResult.card.id);
+	localStorage.setItem(CURRENT_TOKEN_KEY, createId());
+	editingCard = true;
 	state = createDraft(localResult.card);
 	syncInputs();
 	renderAll();
@@ -246,6 +256,8 @@ async function saveCardToBackend(card) {
 				'Accept': 'application/json'
 			},
 			body: JSON.stringify({
+				action: editingCard ? 'update' : 'create',
+				ownerToken: editingCard ? localStorage.getItem(CURRENT_TOKEN_KEY) : undefined,
 				card: {
 					id: card.id,
 					name: card.name,
@@ -258,14 +270,15 @@ async function saveCardToBackend(card) {
 
 		const payload = await response.json().catch(() => null);
 		if (!response.ok || !payload || !payload.ok) {
-			renderSafety(payload && payload.error ? `${payload.error} Saved locally for now.` : 'Saved locally for now.');
+			const error = payload && payload.error ? payload.error : 'Could not save to the shared gallery.';
+			renderSafety(backendConfigured ? error : `${error} Saved locally for now.`);
 			return null;
 		}
 
 		return payload;
 	} catch (error) {
 		console.warn('Visitor backend save failed; using local fallback.', error);
-		renderSafety('Backend unavailable. Saved locally for now.');
+		renderSafety(backendConfigured ? 'Backend unavailable. Please try again.' : 'Backend unavailable. Saved locally for now.');
 		return null;
 	}
 }
@@ -278,7 +291,7 @@ async function deleteCardFromBackend(id) {
 				'Content-Type': 'application/json',
 				'Accept': 'application/json'
 			},
-			body: JSON.stringify({ id })
+			body: JSON.stringify({ id, ownerToken: localStorage.getItem(CURRENT_TOKEN_KEY) })
 		});
 
 		const payload = await response.json().catch(() => null);
@@ -348,6 +361,8 @@ async function clearCurrentCard() {
 		backendCards = backendResult.cards || [];
 		writeCards(backendCards);
 		localStorage.removeItem(CURRENT_ID_KEY);
+		localStorage.removeItem(CURRENT_TOKEN_KEY);
+		editingCard = false;
 		state = createDraft({ number: BASE_GUEST_COUNT + backendCards.length + 1 });
 		syncInputs();
 		renderAll();
@@ -358,6 +373,8 @@ async function clearCurrentCard() {
 	const cards = readCards().filter(card => card.id !== currentId);
 	writeCards(cards);
 	localStorage.removeItem(CURRENT_ID_KEY);
+	localStorage.removeItem(CURRENT_TOKEN_KEY);
+	editingCard = false;
 	state = createDraft({ number: BASE_GUEST_COUNT + cards.length + 1 });
 	syncInputs();
 	renderAll();
@@ -369,9 +386,12 @@ function normalizeColor(color) {
 }
 
 function loadCurrentDraft() {
+	const shouldEdit = new URLSearchParams(window.location.search).get('editVisitor') === '1';
 	const currentId = localStorage.getItem(CURRENT_ID_KEY);
+	const currentToken = localStorage.getItem(CURRENT_TOKEN_KEY);
 	const cards = readLocalCards();
-	const current = cards.find(card => card.id === currentId) || cards[0];
+	const current = shouldEdit && currentId && currentToken ? cards.find(card => card.id === currentId) : null;
+	editingCard = Boolean(current);
 	state = current ? createDraft(current) : createDraft({ number: BASE_GUEST_COUNT + cards.length + 1 });
 	syncInputs();
 }
@@ -520,12 +540,13 @@ function renderGallery(cards = readCards()) {
 	if (!dom.cardGrid) return;
 
 	const currentId = localStorage.getItem(CURRENT_ID_KEY);
+	const currentToken = localStorage.getItem(CURRENT_TOKEN_KEY);
 	if (!cards.length) {
 		dom.cardGrid.innerHTML = '<div class="visitor-empty-state">No cards saved in this browser yet. Create yours from the portfolio entry screen.</div>';
 		return;
 	}
 
-	dom.cardGrid.innerHTML = cards.map(card => cardMarkup(card, card.id === currentId)).join('');
+	dom.cardGrid.innerHTML = cards.map(card => cardMarkup(card, Boolean(currentToken && card.id === currentId))).join('');
 }
 
 function renderStats(cards = readCards()) {
@@ -647,6 +668,16 @@ function syncInputs() {
 }
 
 function syncControls() {
+	const currentId = localStorage.getItem(CURRENT_ID_KEY);
+	const currentToken = localStorage.getItem(CURRENT_TOKEN_KEY);
+	const hasOwnCard = Boolean(currentId && currentToken && readCards().some(card => card.id === currentId));
+	const editLink = document.getElementById('visitorEditCardLink');
+	if (editLink) editLink.hidden = !hasOwnCard;
+	const kicker = document.getElementById('visitorEditorKicker');
+	const heading = document.getElementById('visitorEditorHeading');
+	if (kicker) kicker.textContent = editingCard ? 'Edit your card.' : 'Welcome, visitor.';
+	if (heading) heading.textContent = editingCard ? 'Change anything you like.' : 'Make your card.';
+	if (dom.saveButton) dom.saveButton.textContent = editingCard ? 'Save changes ->' : 'Create card ->';
 	document.querySelectorAll('[data-card-color]').forEach(button => {
 		button.classList.toggle('is-active', button.dataset.cardColor === state.color);
 	});
@@ -654,8 +685,7 @@ function syncControls() {
 		button.classList.toggle('is-active', button.dataset.cardPattern === state.pattern);
 	});
 	if (dom.deleteButton) {
-		const currentId = localStorage.getItem(CURRENT_ID_KEY);
-		dom.deleteButton.disabled = !currentId;
+		dom.deleteButton.disabled = !editingCard || !hasOwnCard;
 	}
 }
 

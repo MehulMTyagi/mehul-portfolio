@@ -21,3 +21,5 @@ visitor-cards/cards.json
 5. Redeploy the project.
 
 Without `BLOB_READ_WRITE_TOKEN`, the frontend falls back to browser localStorage so the portfolio still works locally.
+
+New cards receive a server-generated ID and a private edit token stored in the creator's browser. Creating a card never updates an existing record. Editing or deleting requires that token. Cards saved before this ownership change remain visible but cannot be safely claimed for editing; their creators should make a new card.

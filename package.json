@@ -5,7 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vercel dev",
-    "check": "node --check target-cursor.js && node --check hero-gradient-waves.js && node --check visitor-card.js && node --check script.js && node --check upgrades/upgrades.js && node --check api/visitor-cards.js"
+    "check": "node --check target-cursor.js && node --check hero-gradient-waves.js && node --check visitor-card.js && node --check script.js && node --check upgrades/upgrades.js && node --check api/visitor-cards.js",
+    "test": "node --test tests/visitor-cards.test.js"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.2",

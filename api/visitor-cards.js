@@ -1,4 +1,5 @@
 const { list, put } = require('@vercel/blob');
+const { createHash, randomBytes, randomUUID, timingSafeEqual } = require('node:crypto');
 
 const STORE_PATH = 'visitor-cards/cards.json';
 const MAX_CARDS = 500;
@@ -27,7 +28,7 @@ module.exports = async function handler(req, res) {
 			return sendJson(res, 200, {
 				ok: true,
 				configured: isConfigured(),
-				cards,
+				cards: publicCards(cards),
 				stats: buildStats(cards)
 			});
 		}
@@ -41,7 +42,12 @@ module.exports = async function handler(req, res) {
 			}
 
 			const body = await readJsonBody(req);
-			const result = normalizeIncomingCard(body && body.card ? body.card : body);
+			const incoming = body && body.card ? body.card : body;
+			const action = body && body.action === 'update' ? 'update' : 'create';
+			if (action === 'update' && !cleanText(incoming && incoming.id, 80)) {
+				return sendJson(res, 400, { ok: false, error: 'Missing card id for edit.' });
+			}
+			const result = normalizeIncomingCard(incoming);
 
 			if (!result.ok) {
 				return sendJson(res, 400, {
@@ -51,13 +57,24 @@ module.exports = async function handler(req, res) {
 			}
 
 			const cards = await readCards();
-			const next = upsertCard(cards, result.card);
+			if (action === 'update') {
+				const existing = cards.find(card => card.id === result.card.id);
+				if (!existing) return sendJson(res, 404, { ok: false, error: 'Card not found.' });
+				if (!ownsCard(existing, body && body.ownerToken)) {
+					return sendJson(res, 403, { ok: false, error: 'This card cannot be edited from this browser.' });
+				}
+			}
+			const next = upsertCard(cards, result.card, action);
+			if (!next) {
+				return sendJson(res, 404, { ok: false, error: 'Card not found. Create a new card instead.' });
+			}
 			await writeCards(next.cards);
 
-			return sendJson(res, 200, {
+			return sendJson(res, action === 'create' ? 201 : 200, {
 				ok: true,
-				card: next.card,
-				cards: next.cards,
+				card: publicCard(next.card),
+				ownerToken: next.ownerToken || undefined,
+				cards: publicCards(next.cards),
 				stats: buildStats(next.cards)
 			});
 		}
@@ -81,20 +98,17 @@ module.exports = async function handler(req, res) {
 			}
 
 			const cards = await readCards();
-			const nextCards = cards.filter(card => card.id !== id);
-
-			if (nextCards.length === cards.length) {
-				return sendJson(res, 404, {
-					ok: false,
-					error: 'Card not found.'
-				});
+			const existing = cards.find(card => card.id === id);
+			if (!existing) return sendJson(res, 404, { ok: false, error: 'Card not found.' });
+			if (!ownsCard(existing, body && body.ownerToken)) {
+				return sendJson(res, 403, { ok: false, error: 'This card cannot be deleted from this browser.' });
 			}
-
+			const nextCards = cards.filter(card => card.id !== id);
 			await writeCards(nextCards);
 
 			return sendJson(res, 200, {
 				ok: true,
-				cards: nextCards,
+				cards: publicCards(nextCards),
 				stats: buildStats(nextCards)
 			});
 		}
@@ -149,11 +163,12 @@ async function writeCards(cards) {
 	});
 }
 
-function upsertCard(cards, incoming) {
+function upsertCard(cards, incoming, action) {
 	const now = Date.now();
-	const index = cards.findIndex(card => card.id === incoming.id);
 
-	if (index >= 0) {
+	if (action === 'update') {
+		const index = cards.findIndex(card => card.id === incoming.id);
+		if (index < 0) return null;
 		const existing = cards[index];
 		const card = {
 			...existing,
@@ -171,14 +186,19 @@ function upsertCard(cards, incoming) {
 
 	const card = {
 		...incoming,
+		id: createId(),
+		ownerTokenHash: '',
 		number: nextCardNumber(cards),
 		issued: formatDate(now),
 		createdAt: now,
 		updatedAt: now
 	};
+	const ownerToken = randomBytes(32).toString('hex');
+	card.ownerTokenHash = hashToken(ownerToken);
 
 	return {
 		card,
+		ownerToken,
 		cards: sortCards([card, ...cards]).slice(0, MAX_CARDS)
 	};
 }
@@ -229,6 +249,7 @@ function normalizeStoredCard(card) {
 
 	return {
 		...normalized.card,
+		ownerTokenHash: /^[a-f0-9]{64}$/.test(card.ownerTokenHash || '') ? card.ownerTokenHash : '',
 		number: Number(card.number || BASE_GUEST_COUNT + 1),
 		issued: cleanText(card.issued, 12) || formatDate(Number(card.createdAt || Date.now())),
 		createdAt: Number(card.createdAt || Date.now()),
@@ -301,7 +322,27 @@ function formatDate(time) {
 }
 
 function createId() {
-	return `card-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	return `card-${randomUUID()}`;
+}
+
+function hashToken(token) {
+	return createHash('sha256').update(token).digest('hex');
+}
+
+function ownsCard(card, token) {
+	if (!card.ownerTokenHash || !/^[a-f0-9]{64}$/.test(String(token || ''))) return false;
+	const expected = Buffer.from(card.ownerTokenHash, 'hex');
+	const actual = Buffer.from(hashToken(token), 'hex');
+	return timingSafeEqual(expected, actual);
+}
+
+function publicCard(card) {
+	const { ownerTokenHash, ...visible } = card;
+	return visible;
+}
+
+function publicCards(cards) {
+	return cards.map(publicCard);
 }
 
 function readJsonBody(req) {
