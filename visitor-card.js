@@ -2,6 +2,7 @@ const STORAGE_KEY = 'mehul-visitor-cards-v2';
 const LEGACY_KEY = 'mehul-visitor-card';
 const CURRENT_ID_KEY = 'mehul-visitor-current-card-id';
 const CURRENT_TOKEN_KEY = 'mehul-visitor-current-card-token';
+const PENDING_SYNC_KEY = 'mehul-visitor-pending-card-sync';
 const API_URL = '/api/visitor-cards';
 const BASE_GUEST_COUNT = 1000;
 
@@ -222,12 +223,12 @@ async function saveDraft() {
 		writeCards(backendCards);
 		localStorage.setItem(CURRENT_ID_KEY, backendResult.card.id);
 		if (backendResult.ownerToken) localStorage.setItem(CURRENT_TOKEN_KEY, backendResult.ownerToken);
+		localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify({ id: backendResult.card.id, savedAt: Date.now() }));
 		editingCard = true;
 		state = createDraft(backendResult.card);
 		syncInputs();
 		renderAll();
-		closeEntryModal();
-		document.querySelector('.visitor-gallery-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		showSavedCard();
 		return;
 	}
 	if (backendConfigured) {
@@ -243,8 +244,15 @@ async function saveDraft() {
 	state = createDraft(localResult.card);
 	syncInputs();
 	renderAll();
-	closeEntryModal();
-	document.querySelector('.visitor-gallery-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	showSavedCard();
+}
+
+function showSavedCard() {
+	if (dom.cardGrid) {
+		dom.cardGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		return;
+	}
+	window.location.assign('visitor-card.html#visitorCardGrid');
 }
 
 async function saveCardToBackend(card) {
@@ -362,6 +370,7 @@ async function clearCurrentCard() {
 		writeCards(backendCards);
 		localStorage.removeItem(CURRENT_ID_KEY);
 		localStorage.removeItem(CURRENT_TOKEN_KEY);
+		localStorage.removeItem(PENDING_SYNC_KEY);
 		editingCard = false;
 		state = createDraft({ number: BASE_GUEST_COUNT + backendCards.length + 1 });
 		syncInputs();
@@ -374,6 +383,7 @@ async function clearCurrentCard() {
 	writeCards(cards);
 	localStorage.removeItem(CURRENT_ID_KEY);
 	localStorage.removeItem(CURRENT_TOKEN_KEY);
+	localStorage.removeItem(PENDING_SYNC_KEY);
 	editingCard = false;
 	state = createDraft({ number: BASE_GUEST_COUNT + cards.length + 1 });
 	syncInputs();
@@ -653,7 +663,20 @@ async function syncBackendCards() {
 
 		if (!response.ok || !payload || !payload.ok || !payload.configured || !Array.isArray(payload.cards)) return;
 
-		backendCards = payload.cards;
+		let cards = payload.cards;
+		const pending = JSON.parse(localStorage.getItem(PENDING_SYNC_KEY) || 'null');
+		if (pending && pending.id) {
+			if (cards.some(card => card.id === pending.id) || Date.now() - pending.savedAt > 30000) {
+				localStorage.removeItem(PENDING_SYNC_KEY);
+			} else {
+				const savedCard = readLocalCards().find(card => card.id === pending.id);
+				if (savedCard) {
+					cards = [savedCard, ...cards];
+					window.setTimeout(syncBackendCards, 2000);
+				}
+			}
+		}
+		backendCards = cards;
 		backendConfigured = true;
 		writeCards(backendCards);
 		renderAll();

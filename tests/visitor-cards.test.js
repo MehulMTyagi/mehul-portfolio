@@ -106,3 +106,59 @@ test('creates always get new server IDs while explicit edits retain the original
 	assert.equal(deleted.status, 200);
 	assert.equal(deleted.cards.length, 2);
 });
+
+test('saving opens the gallery and a stale refresh keeps the new card visible', async () => {
+	const values = new Map();
+	const localStorage = {
+		getItem: key => values.get(key) || null,
+		setItem: (key, value) => values.set(key, value),
+		removeItem: key => values.delete(key)
+	};
+	const savedCard = {
+		id: 'saved-card', name: 'New Visitor', signature: '', color: 'onyx',
+		pattern: 'monogram', number: 1001, issued: '10/23/26', createdAt: Date.now()
+	};
+	let galleryCards = [];
+	let destination = '';
+	let retries = 0;
+	const cardGrid = { innerHTML: '', scrollIntoView() {} };
+	const createContext = isGallery => vm.createContext({
+		console: { warn() {} },
+		document: {
+			body: { classList: { toggle() {}, remove() {} } },
+			getElementById: id => isGallery && id === 'visitorCardGrid' ? cardGrid : null,
+			querySelectorAll: () => []
+		},
+		fetch: async (_url, options = {}) => ({
+			ok: true,
+			json: async () => options.method === 'POST'
+				? { ok: true, card: savedCard, cards: [savedCard], ownerToken: 'token' }
+				: { ok: true, configured: true, cards: galleryCards }
+		}),
+		localStorage,
+		URLSearchParams,
+		window: {
+			crypto: { randomUUID: () => 'draft-id' },
+			location: { search: '', hash: '', assign: value => { destination = value; } },
+			setTimeout: () => { retries += 1; }
+		}
+	});
+
+	const editor = createContext(false);
+	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), editor);
+	vm.runInContext('state.name = "New Visitor"', editor);
+	await vm.runInContext('saveDraft()', editor);
+	assert.equal(destination, 'visitor-card.html#visitorCardGrid');
+	assert.equal(values.get('mehul-visitor-current-card-id'), savedCard.id);
+
+	const gallery = createContext(true);
+	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), gallery);
+	await vm.runInContext('syncBackendCards()', gallery);
+	assert.match(cardGrid.innerHTML, /New Visitor/);
+	assert.ok(retries > 0);
+
+	galleryCards = [savedCard];
+	await vm.runInContext('syncBackendCards()', gallery);
+	assert.equal(values.has('mehul-visitor-pending-card-sync'), false);
+	assert.match(cardGrid.innerHTML, /New Visitor/);
+});
