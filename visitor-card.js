@@ -228,7 +228,7 @@ async function saveDraft() {
 		state = createDraft(backendResult.card);
 		syncInputs();
 		renderAll();
-		showSavedCard();
+		returnToPortfolioHero();
 		return;
 	}
 	if (backendConfigured) {
@@ -244,15 +244,18 @@ async function saveDraft() {
 	state = createDraft(localResult.card);
 	syncInputs();
 	renderAll();
-	showSavedCard();
+	returnToPortfolioHero();
 }
 
-function showSavedCard() {
-	if (dom.cardGrid) {
-		dom.cardGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function returnToPortfolioHero() {
+	const hero = document.getElementById('hero-section');
+	if (hero) {
+		closeEntryModal();
+		window.history.replaceState(null, '', 'index.html?skipVisitor=1#hero-section');
+		hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		return;
 	}
-	window.location.assign('visitor-card.html#visitorCardGrid');
+	window.location.assign('index.html?skipVisitor=1#hero-section');
 }
 
 async function saveCardToBackend(card) {

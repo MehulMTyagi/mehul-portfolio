@@ -107,7 +107,7 @@ test('creates always get new server IDs while explicit edits retain the original
 	assert.equal(deleted.cards.length, 2);
 });
 
-test('saving opens the gallery and a stale refresh keeps the new card visible', async () => {
+test('saving returns to the hero and a stale gallery refresh keeps the new card visible', async () => {
 	const values = new Map();
 	const localStorage = {
 		getItem: key => values.get(key) || null,
@@ -120,13 +120,15 @@ test('saving opens the gallery and a stale refresh keeps the new card visible', 
 	};
 	let galleryCards = [];
 	let destination = '';
+	let heroScrolls = 0;
 	let retries = 0;
 	const cardGrid = { innerHTML: '', scrollIntoView() {} };
 	const createContext = isGallery => vm.createContext({
 		console: { warn() {} },
 		document: {
 			body: { classList: { toggle() {}, remove() {} } },
-			getElementById: id => isGallery && id === 'visitorCardGrid' ? cardGrid : null,
+			getElementById: id => isGallery && id === 'visitorCardGrid' ? cardGrid
+				: !isGallery && id === 'hero-section' ? { scrollIntoView() { heroScrolls += 1; } } : null,
 			querySelectorAll: () => []
 		},
 		fetch: async (_url, options = {}) => ({
@@ -139,6 +141,7 @@ test('saving opens the gallery and a stale refresh keeps the new card visible', 
 		URLSearchParams,
 		window: {
 			crypto: { randomUUID: () => 'draft-id' },
+			history: { replaceState: (_state, _title, url) => { destination = url; } },
 			location: { search: '', hash: '', assign: value => { destination = value; } },
 			setTimeout: () => { retries += 1; }
 		}
@@ -148,7 +151,8 @@ test('saving opens the gallery and a stale refresh keeps the new card visible', 
 	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), editor);
 	vm.runInContext('state.name = "New Visitor"', editor);
 	await vm.runInContext('saveDraft()', editor);
-	assert.equal(destination, 'visitor-card.html#visitorCardGrid');
+	assert.equal(destination, 'index.html?skipVisitor=1#hero-section');
+	assert.equal(heroScrolls, 1);
 	assert.equal(values.get('mehul-visitor-current-card-id'), savedCard.id);
 
 	const gallery = createContext(true);
