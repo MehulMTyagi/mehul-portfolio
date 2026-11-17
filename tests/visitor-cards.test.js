@@ -104,6 +104,15 @@ test('older local cards render with day/month/year dates', () => {
 	assert.match(markup, /Neha Kapoor/);
 });
 
+test('cards created just after midnight in India use the local date', async () => {
+	const request = loadApi([{
+		id: 'midnight-card', name: 'Arjun Mehta', number: 1015,
+		createdAt: Date.parse('2026-11-16T19:00:00.000Z')
+	}]);
+	const result = await request('GET');
+	assert.equal(result.cards[0].issued, '17/11/2026');
+});
+
 test('a new browser never adopts the first public gallery card', () => {
 	const cards = [{ id: 'anusha-card', name: 'Anuu', color: 'onyx', pattern: 'monogram' }];
 	assert.deepEqual(loadClient({ cards }), { id: 'fresh-id', editingCard: false });

@@ -416,8 +416,12 @@ function loadCurrentDraft() {
 }
 
 function formatDate(time) {
-	const date = new Date(time);
-	return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
+	return new Date(time).toLocaleDateString('en-GB', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		timeZone: 'Asia/Kolkata'
+	});
 }
 
 function escapeHtml(value) {
