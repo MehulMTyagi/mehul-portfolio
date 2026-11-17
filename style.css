@@ -1233,6 +1233,189 @@ body.preloader-active {
   will-change: transform;
 }
 
+/* ===== EXPERIENCE ===== */
+.experience-section-card .card-inner {
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 110px clamp(28px, 7vw, 110px);
+  background: #0b0c0e;
+  color: #f7f7f5;
+  text-align: left;
+}
+
+.experience-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+}
+
+.experience-rule-purple {
+  top: 11%;
+  background: #a973f6;
+}
+
+.experience-rule-green {
+  bottom: 11%;
+  background: #72ee90;
+}
+
+.experience-board {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 100%);
+}
+
+.experience-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.experience-kicker,
+.experience-type,
+.experience-period,
+.experience-duration {
+  font-family: "Host Grotesk", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.experience-kicker {
+  margin: 0 0 9px;
+  color: #72ee90;
+}
+
+.experience-head h2,
+.experience-details h3 {
+  margin: 0;
+  font-family: "Barlow Condensed", Impact, sans-serif;
+  font-weight: 900;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.experience-head h2 {
+  font-size: clamp(3.2rem, 6.5vw, 6.4rem);
+}
+
+.experience-head h2 span {
+  color: #a973f6;
+}
+
+.experience-feature {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.48fr) minmax(0, 1.52fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: stretch;
+  padding-top: clamp(40px, 5vw, 80px);
+}
+
+.experience-period {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  color: #bcbec1;
+}
+
+.experience-period-line {
+  width: 2px;
+  min-height: 150px;
+  flex: 1;
+  margin-left: 6px;
+  background: #a973f6;
+}
+
+.experience-period time:last-child {
+  color: #72ee90;
+}
+
+.experience-type {
+  margin: 0 0 18px;
+  color: #a973f6;
+}
+
+.experience-details h3 {
+  max-width: 100%;
+  font-size: clamp(4rem, 8.4vw, 8.4rem);
+  overflow-wrap: anywhere;
+}
+
+.experience-role {
+  margin: 30px 0 0;
+  font-family: "Host Grotesk", sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 2.25rem);
+  font-weight: 750;
+}
+
+.experience-duration {
+  margin: 8px 0 0;
+  color: #9fa4a9;
+}
+
+@media (max-width: 1023px) {
+  .experience-section-card .card-inner {
+    min-height: 660px !important;
+    padding: 110px 6vw 100px;
+  }
+
+  .experience-rule-purple { top: 6%; }
+  .experience-rule-green { bottom: 6%; }
+}
+
+@media (max-width: 600px) {
+  .experience-section-card .card-inner {
+    min-height: 0 !important;
+    padding: 96px 20px 94px;
+  }
+
+  .experience-head {
+    display: block;
+    padding-bottom: 22px;
+  }
+
+  .experience-head h2 {
+    font-size: clamp(2.5rem, 11vw, 4rem);
+  }
+
+  .experience-feature {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-top: 28px;
+  }
+
+  .experience-period {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .experience-period-line {
+    width: auto;
+    min-height: 2px;
+    height: 2px;
+    margin-left: 0;
+  }
+
+  .experience-details h3 {
+    font-size: clamp(3.2rem, 14vw, 5rem);
+  }
+
+  .experience-role {
+    margin-top: 24px;
+    font-size: 1.4rem;
+  }
+}
+
 /* ===== FLOATING IMAGES (Card 1) ===== */
 #card-1 .card-inner {
   background-color: #000;
@@ -1320,6 +1503,14 @@ body.preloader-active {
   object-fit: contain;
   display: block;
   filter: brightness(1.18) saturate(1.28) contrast(1.06);
+}
+
+#card-1 .stack-logo-glyph {
+  color: var(--stack-color);
+  font-family: "Host Grotesk", sans-serif;
+  font-size: 1.65rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 #card-1 .stack-logo-label {
@@ -4642,5 +4833,12 @@ body.preloader-active {
 
   .mobile-project-copy {
     padding: 14px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1250px) {
+  .glass-nav a.nav-link {
+    padding: 0 11px;
+    font-size: 16px;
   }
 }

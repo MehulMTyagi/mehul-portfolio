@@ -72,7 +72,7 @@ function getScrollTargetY(targetId) {
 
 	if (window.matchMedia('(min-width: 1024px)').matches && targetEl.classList.contains('card')) {
 		const stickyCards = document.querySelector('.sticky-cards');
-		const cardOrder = ['#card-4', '#card-3', '#card-upgrade', '#card-1'];
+		const cardOrder = ['#card-4', '#card-3', '#card-experience', '#card-upgrade', '#card-1'];
 		const cardIndex = cardOrder.indexOf(targetId);
 
 		if (stickyCards && cardIndex >= 0) {
@@ -361,7 +361,12 @@ window.addEventListener('load', () => {
 			{ icon: "assets/stack/pandas.svg", label: "Pandas", color: "#b59cf2" },
 			{ icon: "assets/stack/scikitlearn.svg", label: "Scikit-learn", color: "#f89939" },
 			{ icon: "assets/stack/matplotlib.svg", label: "Matplotlib", color: "#f1c84a" },
-			{ icon: "assets/stack/jira.svg", label: "Jira", color: "#2684ff" }
+			{ icon: "assets/stack/jira.svg", label: "Jira", color: "#2684ff" },
+			{ mark: "SC", label: "Scapy", color: "#12a7bc" },
+			{ mark: "JL", label: "Joblib", color: "#e1b04a" },
+			{ mark: "SB", label: "Seaborn", color: "#62a0ce" },
+			{ mark: "GS", label: "GSAP", color: "#88ce02" },
+			{ mark: "V", label: "Vercel", color: "#f8fafc" }
 		];
 		let stackQueue = [];
 
@@ -391,7 +396,7 @@ window.addEventListener('load', () => {
 			el.className = 'floating-stack-logo';
 			el.style.setProperty('--stack-color', tech.color);
 			el.innerHTML = `
-				<span class="stack-logo-mark"><img src="${tech.icon}" alt="" loading="lazy"></span>
+				<span class="stack-logo-mark">${tech.icon ? `<img src="${tech.icon}" alt="" loading="lazy">` : `<span class="stack-logo-glyph" aria-hidden="true">${tech.mark}</span>`}</span>
 				<span class="stack-logo-label">${tech.label}</span>
 			`;
 
@@ -602,9 +607,10 @@ window.addEventListener('load', () => {
 		{ id: 'i-can-section', index: '02', title: 'I can' },
 		{ id: 'card-4', index: '03', title: 'Capabilities' },
 		{ id: 'card-3', index: '04', title: 'Projects' },
-		{ id: 'card-upgrade', index: '05', title: 'Education' },
-		{ id: 'card-1', index: '06', title: 'Stack' },
-		{ id: 'about', index: '07', title: 'Contact' }
+		{ id: 'card-experience', index: '05', title: 'Experience' },
+		{ id: 'card-upgrade', index: '06', title: 'Education' },
+		{ id: 'card-1', index: '07', title: 'Stack' },
+		{ id: 'about', index: '08', title: 'Contact' }
 	]
 		.map(section => ({ ...section, el: document.getElementById(section.id) }))
 		.filter(section => section.el);
