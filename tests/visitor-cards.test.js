@@ -78,10 +78,30 @@ test('seeded gallery records retain their origin and date across saves', async (
 	]);
 	const first = await request('GET');
 	assert.equal(first.stats.total, 2);
-	assert.equal(first.cards.find(card => card.id === 'seed-devika').issued, '11/08/26');
+	assert.equal(first.cards.find(card => card.id === 'seed-devika').issued, '08/11/2026');
 	const created = await request('POST', { action: 'create', card: { name: 'New Guest' } });
 	assert.equal(created.stats.total, 3);
 	assert.equal(created.cards.find(card => card.id === 'seed-devika').seeded, true);
+	assert.match(created.card.issued, /^\d{2}\/\d{2}\/\d{4}$/);
+});
+
+test('older local cards render with day/month/year dates', () => {
+	const cards = [{
+		id: 'legacy-card', name: 'Neha Kapoor', color: 'emerald', pattern: 'orbit',
+		number: 1010, issued: '08/21/26', createdAt: Date.parse('2026-08-21T12:00:00.000Z')
+	}];
+	const values = new Map([['mehul-visitor-cards-v2', JSON.stringify(cards)]]);
+	const context = vm.createContext({
+		console: { warn() {} },
+		localStorage: { getItem: key => values.get(key) || null },
+		window: { crypto: { randomUUID: () => 'fresh-id' }, location: { search: '', hash: '' } },
+		document: { body: { classList: { toggle() {} } }, getElementById: () => null, querySelectorAll: () => [] },
+		URLSearchParams
+	});
+	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), context);
+	const markup = vm.runInContext('cardMarkup(readLocalCards()[0])', context);
+	assert.match(markup, /21\/08\/2026/);
+	assert.match(markup, /Neha Kapoor/);
 });
 
 test('a new browser never adopts the first public gallery card', () => {

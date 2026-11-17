@@ -252,7 +252,7 @@ function normalizeStoredCard(card) {
 		...(card.seeded === true ? { seeded: true } : {}),
 		ownerTokenHash: /^[a-f0-9]{64}$/.test(card.ownerTokenHash || '') ? card.ownerTokenHash : '',
 		number: Number(card.number || BASE_GUEST_COUNT + 1),
-		issued: cleanText(card.issued, 12) || formatDate(Number(card.createdAt || Date.now())),
+		issued: formatDate(Number(card.createdAt || Date.now())),
 		createdAt: Number(card.createdAt || Date.now()),
 		updatedAt: Number(card.updatedAt || card.createdAt || Date.now())
 	};
@@ -315,11 +315,8 @@ function containsBlockedTerm(value) {
 }
 
 function formatDate(time) {
-	return new Date(time).toLocaleDateString('en-US', {
-		month: '2-digit',
-		day: '2-digit',
-		year: '2-digit'
-	});
+	const date = new Date(time);
+	return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
 }
 
 function createId() {

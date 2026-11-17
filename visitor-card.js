@@ -136,7 +136,7 @@ function createDraft(source = {}) {
 		color: normalizeColor(source.color || cardDefaults.color),
 		pattern: source.pattern || cardDefaults.pattern,
 		number: source.number || BASE_GUEST_COUNT + 1,
-		issued: source.issued || formatDate(Date.now()),
+		issued: formatDate(source.createdAt || Date.now()),
 		createdAt: source.createdAt || Date.now(),
 		updatedAt: Date.now()
 	};
@@ -175,7 +175,11 @@ function readLocalCards() {
 		return Array.isArray(cards)
 			? cards
 				.filter(card => card && card.id && card.name && validateStoredCard(card))
-				.map(card => ({ ...card, color: normalizeColor(card.color) }))
+				.map(card => ({
+					...card,
+					color: normalizeColor(card.color),
+					issued: formatDate(card.createdAt || Date.now())
+				}))
 			: [];
 	} catch (error) {
 		console.warn('Visitor cards could not be read.', error);
@@ -412,11 +416,8 @@ function loadCurrentDraft() {
 }
 
 function formatDate(time) {
-	return new Date(time).toLocaleDateString('en-US', {
-		month: '2-digit',
-		day: '2-digit',
-		year: '2-digit'
-	});
+	const date = new Date(time);
+	return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
 }
 
 function escapeHtml(value) {
@@ -513,17 +514,22 @@ function cardMarkup(card, isMine = false) {
 			<article class="visitor-card" data-color="${escapeHtml(card.color)}">
 				<div class="visitor-card-art">${patternSvg(card.pattern)}</div>
 				<div class="visitor-card-content">
-					<div class="visitor-card-brand">Mehul's World</div>
+					<div class="visitor-card-top">
+						<div class="visitor-card-brand">
+							<span class="visitor-card-monogram">MT</span>
+							<span>MEHUL TYAGI<small>PORTFOLIO / VISITORS</small></span>
+						</div>
+						<span class="visitor-card-edition">GUEST<br>PASS</span>
+					</div>
 					<div class="visitor-card-meta">
-						<span class="visitor-card-label">Visitor</span>
+						<span class="visitor-card-label">ISSUED TO</span>
 						<strong class="visitor-card-name">${escapeHtml(card.name)}</strong>
-						<span class="visitor-card-label">Issued on</span>
-						<strong class="visitor-card-date">${escapeHtml(card.issued)}</strong>
 					</div>
 					<div class="visitor-card-footer">
-						<span>No. ${escapeHtml(card.number)}</span>
-						<span>X</span>
+						<div class="visitor-card-detail"><span>ISSUED</span><strong class="visitor-card-date">${escapeHtml(card.issued)}</strong></div>
+						<div class="visitor-card-detail"><span>PASS NO.</span><strong>${escapeHtml(card.number)}</strong></div>
 						<div class="visitor-signature">
+							<span>SIGNATURE</span>
 							${safeSignature ? `<span class="visitor-signature-text">${escapeHtml(safeSignature)}</span>` : ''}
 						</div>
 					</div>
