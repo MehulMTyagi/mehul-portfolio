@@ -21,14 +21,20 @@ const colorAliases = {
 };
 
 const sampleNames = [
-	'Pixel Lantern',
-	'Neon Compass',
-	'Code Signal',
-	'Vector Orbit',
-	'Cloud Runner',
-	'Binary Bloom',
-	'Logic Spark',
-	'Circuit Wave'
+	'Ananya Sharma',
+	'Arjun Mehta',
+	'Priya Nair',
+	'Rohan Verma',
+	'Kavya Rao',
+	'Devika Patel',
+	'Siddharth Jain',
+	'Neha Kapoor'
+];
+
+const exampleCards = [
+	{ name: 'Ananya Sharma', color: 'champagne', pattern: 'orbit', number: '01' },
+	{ name: 'Arjun Mehta', color: 'emerald', pattern: 'mesh', number: '02' },
+	{ name: 'Priya Nair', color: 'violet', pattern: 'signal', number: '03' }
 ];
 
 const blockedTerms = [
@@ -106,6 +112,7 @@ const dom = {
 	safetyMessage: document.getElementById('visitorSafetyMessage'),
 	preview: document.getElementById('visitorCardPreview'),
 	cardGrid: document.getElementById('visitorCardGrid'),
+	exampleGrid: document.getElementById('visitorExampleGrid'),
 	colorStats: document.getElementById('visitorColorStats'),
 	guestCount: document.getElementById('visitorGuestCount'),
 	totalStat: document.getElementById('visitorTotalStat'),
@@ -505,7 +512,7 @@ function patternSvg(pattern) {
 	return `<svg viewBox="0 0 540 320" aria-hidden="true">${paths[pattern] || paths.monogram}</svg>`;
 }
 
-function cardMarkup(card, isMine = false) {
+function cardMarkup(card, isMine = false, isExample = false) {
 	const safeSignature = cleanDisplayValue(card.signature, 28);
 
 	return `
@@ -515,13 +522,13 @@ function cardMarkup(card, isMine = false) {
 				<div class="visitor-card-content">
 					<div class="visitor-card-brand">Mehul's World</div>
 					<div class="visitor-card-meta">
-						<span class="visitor-card-label">Visitor</span>
+						<span class="visitor-card-label">${isExample ? 'Example' : 'Visitor'}</span>
 						<strong class="visitor-card-name">${escapeHtml(card.name)}</strong>
-						<span class="visitor-card-label">Issued on</span>
-						<strong class="visitor-card-date">${escapeHtml(card.issued)}</strong>
+						<span class="visitor-card-label">${isExample ? 'Pattern' : 'Issued on'}</span>
+						<strong class="visitor-card-date">${isExample ? escapeHtml(card.pattern) : escapeHtml(card.issued)}</strong>
 					</div>
 					<div class="visitor-card-footer">
-						<span>No. ${escapeHtml(card.number)}</span>
+						<span>${isExample ? 'Example' : 'No.'} ${escapeHtml(card.number)}</span>
 						<span>X</span>
 						<div class="visitor-signature">
 							${safeSignature ? `<span class="visitor-signature-text">${escapeHtml(safeSignature)}</span>` : ''}
@@ -562,6 +569,11 @@ function renderGallery(cards = readCards()) {
 	}
 
 	dom.cardGrid.innerHTML = cards.map(card => cardMarkup(card, Boolean(currentToken && card.id === currentId))).join('');
+}
+
+function renderExamples() {
+	if (!dom.exampleGrid) return;
+	dom.exampleGrid.innerHTML = exampleCards.map(card => cardMarkup(card, false, true)).join('');
 }
 
 function renderStats(cards = readCards()) {
@@ -781,4 +793,5 @@ syncEntryModalState();
 loadCurrentDraft();
 bindEvents();
 renderAll();
+renderExamples();
 syncBackendCards();

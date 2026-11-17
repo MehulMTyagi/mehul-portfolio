@@ -7,7 +7,7 @@ const vm = require('node:vm');
 
 const root = join(__dirname, '..');
 
-function loadClient({ cards, currentId, currentToken, search = '', hash = '', withModal = false }) {
+function loadClient({ cards, currentId, currentToken, search = '', hash = '', withModal = false, withExamples = false }) {
 	const values = new Map([['mehul-visitor-cards-v2', JSON.stringify(cards)]]);
 	if (currentId) values.set('mehul-visitor-current-card-id', currentId);
 	if (currentToken) values.set('mehul-visitor-current-card-token', currentToken);
@@ -16,13 +16,18 @@ function loadClient({ cards, currentId, currentToken, search = '', hash = '', wi
 		setItem: (key, value) => values.set(key, value),
 		removeItem: key => values.delete(key)
 	};
+	const exampleGrid = { innerHTML: '' };
+	const totalStat = { textContent: '' };
 	const context = vm.createContext({
 		console: { warn() {} },
 		document: {
 			body: { classList: { toggle() {}, remove() {} } },
-			getElementById: id => withModal && id === 'visitorEntryModal'
-				? { classList: { toggle() {} }, setAttribute() {} }
-				: null,
+			getElementById: id => {
+				if (withModal && id === 'visitorEntryModal') return { classList: { toggle() {} }, setAttribute() {} };
+				if (withExamples && id === 'visitorExampleGrid') return exampleGrid;
+				if (withExamples && id === 'visitorTotalStat') return totalStat;
+				return null;
+			},
 			querySelectorAll: () => []
 		},
 		fetch: async () => { throw new Error('offline'); },
@@ -36,11 +41,15 @@ function loadClient({ cards, currentId, currentToken, search = '', hash = '', wi
 	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), context);
 	const result = JSON.parse(JSON.stringify(vm.runInContext('({ id: state.id, editingCard })', context)));
 	if (withModal) result.modalOpen = vm.runInContext('shouldShowEntryModal()', context);
+	if (withExamples) {
+		result.exampleMarkup = exampleGrid.innerHTML;
+		result.totalStat = totalStat.textContent;
+	}
 	return result;
 }
 
-function loadApi() {
-	let storedCards = [];
+function loadApi(initialCards = []) {
+	let storedCards = initialCards;
 	const module = { exports: {} };
 	const context = vm.createContext({
 		Buffer,
@@ -69,6 +78,31 @@ function loadApi() {
 		return { status: response.statusCode, ...response.payload };
 	};
 }
+
+test('one-time cleanup removes only the two old example cards', async () => {
+	const request = loadApi([
+		{ id: 'd879d5d4-7055-451a-8f0e-b8fc15b0fe95', name: 'Binary Bloom' },
+		{ id: '8d2b0858-e130-431f-81e2-95f88d0995dc', name: 'Logic Spark' },
+		{ id: 'real-visitor', name: 'Anusha' },
+		{ id: 'other-id', name: 'Binary Bloom' }
+	]);
+	const result = await request('GET');
+	assert.equal(result.status, 200);
+	assert.equal(result.stats.total, 2);
+	assert.deepEqual(new Set(result.cards.map(card => card.id)), new Set(['real-visitor', 'other-id']));
+});
+
+test('Indian-name examples do not increase real visitor stats', () => {
+	const result = loadClient({
+		cards: [{ id: 'real-visitor', name: 'Anusha', color: 'onyx', pattern: 'mesh' }],
+		withExamples: true
+	});
+	assert.equal(result.totalStat, '1 card');
+	assert.match(result.exampleMarkup, /ANANYA SHARMA/i);
+	assert.match(result.exampleMarkup, /ARJUN MEHTA/i);
+	assert.match(result.exampleMarkup, /PRIYA NAIR/i);
+	assert.doesNotMatch(result.exampleMarkup, /Binary Bloom|Logic Spark/i);
+});
 
 test('a new browser never adopts the first public gallery card', () => {
 	const cards = [{ id: 'anusha-card', name: 'Anuu', color: 'onyx', pattern: 'monogram' }];

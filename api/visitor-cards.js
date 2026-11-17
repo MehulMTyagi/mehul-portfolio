@@ -4,6 +4,10 @@ const { createHash, randomBytes, randomUUID, timingSafeEqual } = require('node:c
 const STORE_PATH = 'visitor-cards/cards.json';
 const MAX_CARDS = 500;
 const BASE_GUEST_COUNT = 1000;
+const LEGACY_EXAMPLE_IDS = new Set([
+	'd879d5d4-7055-451a-8f0e-b8fc15b0fe95',
+	'8d2b0858-e130-431f-81e2-95f88d0995dc'
+]);
 
 const allowedColors = new Set(['onyx', 'emerald', 'violet', 'champagne']);
 const allowedPatterns = new Set(['monogram', 'orbit', 'mesh', 'signal']);
@@ -148,11 +152,16 @@ async function readCards() {
 	const data = await response.json().catch(() => []);
 	if (!Array.isArray(data)) return [];
 
-	return data
+	const cards = data
 		.filter(card => card && typeof card === 'object')
 		.map(normalizeStoredCard)
 		.filter(Boolean)
 		.slice(0, MAX_CARDS);
+	if (!cards.some(card => LEGACY_EXAMPLE_IDS.has(card.id))) return cards;
+
+	const remaining = cards.filter(card => !LEGACY_EXAMPLE_IDS.has(card.id));
+	await writeCards(remaining);
+	return remaining;
 }
 
 async function writeCards(cards) {
