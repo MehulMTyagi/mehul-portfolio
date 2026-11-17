@@ -3735,6 +3735,8 @@ body.preloader-active {
 
 .glass-nav.glass-surface {
   grid-column: auto;
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
   min-height: 64px;
   gap: 8px;
   padding: 8px;
