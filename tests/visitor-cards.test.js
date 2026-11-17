@@ -70,29 +70,18 @@ function loadApi(initialCards = []) {
 	};
 }
 
-test('backfills dated Indian-name cards once without changing existing visitors', async () => {
-	const createdAt = Date.parse('2026-10-23T12:00:00.000Z');
+test('seeded gallery records retain their origin and date across saves', async () => {
+	const createdAt = Date.parse('2026-11-08T12:00:00.000Z');
 	const request = loadApi([
-		{ id: 'anusha-card', name: 'Anusha', number: 1006, createdAt },
-		{ id: 'yash-card', name: 'Yash', number: 1005, createdAt },
-		{ id: 'harsh-card', name: 'Harsh Tyagi', number: 1004, createdAt }
+		{ id: 'seed-devika', name: 'Devika Patel', number: 1012, issued: '11/08/26', createdAt, seeded: true },
+		{ id: 'anusha-card', name: 'Anusha', number: 1006, createdAt: Date.parse('2026-10-23T12:00:00.000Z') }
 	]);
 	const first = await request('GET');
-	const second = await request('GET');
-	assert.equal(first.status, 200);
-	assert.equal(first.stats.total, 9);
-	assert.equal(second.stats.total, 9);
-	assert.equal(new Set(first.cards.map(card => card.id)).size, 9);
-	assert.equal(first.cards.find(card => card.id === 'anusha-card').number, 1006);
-	const seeded = first.cards.filter(card => card.seeded);
-	assert.equal(seeded.length, 6);
-	assert.deepEqual(new Set(seeded.map(card => card.name)), new Set([
-		'Ananya Sharma', 'Arjun Mehta', 'Priya Nair',
-		'Rohan Verma', 'Kavya Rao', 'Devika Patel'
-	]));
-	assert.equal(seeded.find(card => card.name === 'Ananya Sharma').issued, '08/21/26');
-	assert.equal(seeded.find(card => card.name === 'Devika Patel').issued, '11/08/26');
-	assert.ok(seeded.every(card => card.createdAt >= Date.parse('2026-08-01') && card.createdAt <= Date.parse('2026-11-17')));
+	assert.equal(first.stats.total, 2);
+	assert.equal(first.cards.find(card => card.id === 'seed-devika').issued, '11/08/26');
+	const created = await request('POST', { action: 'create', card: { name: 'New Guest' } });
+	assert.equal(created.stats.total, 3);
+	assert.equal(created.cards.find(card => card.id === 'seed-devika').seeded, true);
 });
 
 test('a new browser never adopts the first public gallery card', () => {
@@ -125,16 +114,16 @@ test('creates always get new server IDs while explicit edits retain the original
 	assert.equal(third.status, 201);
 	assert.match(second.ownerToken, /^[a-f0-9]{64}$/);
 	assert.equal(second.card.ownerTokenHash, undefined);
-	assert.equal(third.cards.length, 9);
-	assert.equal(new Set(third.cards.map(card => card.id)).size, 9);
-	assert.ok(['Anuu', 'As K', 'Harsh'].every(name => third.cards.some(card => card.name === name)));
+	assert.equal(third.cards.length, 3);
+	assert.equal(new Set(third.cards.map(card => card.id)).size, 3);
+	assert.deepEqual(new Set(third.cards.map(card => card.name)), new Set(['Anuu', 'As K', 'Harsh']));
 
 	const denied = await request('POST', { action: 'update', card: { id: second.card.id, name: 'Wrong Owner' } });
 	assert.equal(denied.status, 403);
 	const edited = await request('POST', { action: 'update', ownerToken: second.ownerToken, card: { id: second.card.id, name: 'As K Updated' } });
 	assert.equal(edited.status, 200);
 	assert.equal(edited.ownerToken, undefined);
-	assert.equal(edited.cards.length, 9);
+	assert.equal(edited.cards.length, 3);
 	assert.equal(edited.cards.find(card => card.id === first.card.id).name, 'Anuu');
 	assert.equal(edited.cards.find(card => card.id === second.card.id).name, 'As K Updated');
 
@@ -144,7 +133,7 @@ test('creates always get new server IDs while explicit edits retain the original
 	assert.equal((await request('DELETE', { id: first.card.id })).status, 403);
 	const deleted = await request('DELETE', { id: first.card.id, ownerToken: first.ownerToken });
 	assert.equal(deleted.status, 200);
-	assert.equal(deleted.cards.length, 8);
+	assert.equal(deleted.cards.length, 2);
 });
 
 test('saving returns to the hero and a stale gallery refresh keeps the new card visible', async () => {
