@@ -366,7 +366,13 @@ window.addEventListener('load', () => {
 			{ mark: "JL", label: "Joblib", color: "#e1b04a" },
 			{ mark: "SB", label: "Seaborn", color: "#62a0ce" },
 			{ mark: "GS", label: "GSAP", color: "#88ce02" },
-			{ mark: "V", label: "Vercel", color: "#f8fafc" }
+			{ mark: "V", label: "Vercel", color: "#f8fafc" },
+			{ mark: "R", label: "React", color: "#61dafb" },
+			{ mark: "TF", label: "TensorFlow", color: "#ff6f00" },
+			{ mark: "AS", label: "Android Studio", color: "#3ddc84" },
+			{ mark: "FS", label: "Firestore", color: "#ffca28" },
+			{ mark: "SQL", label: "SQL", color: "#64b5f6" },
+			{ mark: "VS", label: "VS Code", color: "#23a9f2" }
 		];
 		let stackQueue = [];
 

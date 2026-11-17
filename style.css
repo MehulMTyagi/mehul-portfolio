@@ -1508,7 +1508,7 @@ body.preloader-active {
 #card-1 .stack-logo-glyph {
   color: var(--stack-color);
   font-family: "Host Grotesk", sans-serif;
-  font-size: 1.65rem;
+  font-size: clamp(1.1rem, 2vw, 1.65rem);
   font-weight: 900;
   line-height: 1;
 }
