@@ -5,6 +5,15 @@ const STORE_PATH = 'visitor-cards/cards.json';
 const MAX_CARDS = 500;
 const BASE_GUEST_COUNT = 1000;
 
+const GALLERY_BACKFILL = [
+	{ id: 'seed-2026-08-ananya-sharma', name: 'Ananya Sharma', date: '2026-08-21', color: 'champagne', pattern: 'orbit' },
+	{ id: 'seed-2026-09-arjun-mehta', name: 'Arjun Mehta', date: '2026-09-06', color: 'emerald', pattern: 'mesh' },
+	{ id: 'seed-2026-09-priya-nair', name: 'Priya Nair', date: '2026-09-27', color: 'violet', pattern: 'signal' },
+	{ id: 'seed-2026-10-rohan-verma', name: 'Rohan Verma', date: '2026-10-11', color: 'onyx', pattern: 'monogram' },
+	{ id: 'seed-2026-10-kavya-rao', name: 'Kavya Rao', date: '2026-10-30', color: 'emerald', pattern: 'orbit' },
+	{ id: 'seed-2026-11-devika-patel', name: 'Devika Patel', date: '2026-11-08', color: 'champagne', pattern: 'mesh' }
+];
+
 const allowedColors = new Set(['onyx', 'emerald', 'violet', 'champagne']);
 const allowedPatterns = new Set(['monogram', 'orbit', 'mesh', 'signal']);
 
@@ -148,11 +157,36 @@ async function readCards() {
 	const data = await response.json().catch(() => []);
 	if (!Array.isArray(data)) return [];
 
-	return data
+	const cards = data
 		.filter(card => card && typeof card === 'object')
 		.map(normalizeStoredCard)
 		.filter(Boolean)
 		.slice(0, MAX_CARDS);
+
+	const missing = GALLERY_BACKFILL.filter(seed => !cards.some(card => card.id === seed.id));
+	if (!missing.length) return cards;
+
+	let number = cards.reduce((max, card) => Math.max(max, Number(card.number || 0)), BASE_GUEST_COUNT);
+	const additions = missing.map(seed => {
+		const createdAt = Date.parse(`${seed.date}T12:00:00.000Z`);
+		const [, month, day] = seed.date.split('-');
+		return {
+			id: seed.id,
+			name: seed.name,
+			signature: '',
+			color: seed.color,
+			pattern: seed.pattern,
+			ownerTokenHash: '',
+			number: ++number,
+			issued: `${month}/${day}/26`,
+			createdAt,
+			updatedAt: createdAt,
+			seeded: true
+		};
+	});
+	const next = sortCards([...cards, ...additions]).slice(0, MAX_CARDS);
+	await writeCards(next);
+	return next;
 }
 
 async function writeCards(cards) {
@@ -249,6 +283,7 @@ function normalizeStoredCard(card) {
 
 	return {
 		...normalized.card,
+		...(card.seeded === true ? { seeded: true } : {}),
 		ownerTokenHash: /^[a-f0-9]{64}$/.test(card.ownerTokenHash || '') ? card.ownerTokenHash : '',
 		number: Number(card.number || BASE_GUEST_COUNT + 1),
 		issued: cleanText(card.issued, 12) || formatDate(Number(card.createdAt || Date.now())),
