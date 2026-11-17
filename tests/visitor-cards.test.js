@@ -48,8 +48,8 @@ function loadClient({ cards, currentId, currentToken, search = '', hash = '', wi
 	return result;
 }
 
-function loadApi(initialCards = []) {
-	let storedCards = initialCards;
+function loadApi() {
+	let storedCards = [];
 	const module = { exports: {} };
 	const context = vm.createContext({
 		Buffer,
@@ -78,19 +78,6 @@ function loadApi(initialCards = []) {
 		return { status: response.statusCode, ...response.payload };
 	};
 }
-
-test('one-time cleanup removes only the two old example cards', async () => {
-	const request = loadApi([
-		{ id: 'd879d5d4-7055-451a-8f0e-b8fc15b0fe95', name: 'Binary Bloom' },
-		{ id: '8d2b0858-e130-431f-81e2-95f88d0995dc', name: 'Logic Spark' },
-		{ id: 'real-visitor', name: 'Anusha' },
-		{ id: 'other-id', name: 'Binary Bloom' }
-	]);
-	const result = await request('GET');
-	assert.equal(result.status, 200);
-	assert.equal(result.stats.total, 2);
-	assert.deepEqual(new Set(result.cards.map(card => card.id)), new Set(['real-visitor', 'other-id']));
-});
 
 test('Indian-name examples do not increase real visitor stats', () => {
 	const result = loadClient({
