@@ -500,38 +500,38 @@ function renderSafety(message) {
 
 function patternSvg(pattern) {
 	const paths = {
-		monogram: '<path d="M98 224V92l72 94 72-94v132M314 224V92h92c38 0 64 22 64 54s-26 54-64 54h-48"/>',
-		stars: '<path d="M306 34l18 54 56 2-44 34 16 54-46-31-47 31 17-54-44-34 56-2zM108 146l12 35 36 1-29 22 11 34-30-20-31 20 11-34-28-22 35-1zM432 172l10 30 32 1-25 19 9 30-26-17-26 17 9-30-25-19 32-1z"/>',
-		orbit: '<path d="M82 190c82-96 228-132 332-78 76 40 72 118-8 146-98 34-252-14-308-92M126 104c84 128 212 180 314 126 78-42 72-136-18-168-100-36-236 4-296 42M268 82c62 30 96 82 80 132-15 47-70 68-126 48-62-23-96-82-74-130 19-43 68-62 120-50z"/>',
-		mesh: '<path d="M78 236c80-90 190-118 322-82M94 96c96 74 206 108 338 106M148 270c42-126 120-198 236-216M398 68c-6 102-54 174-146 218M124 150c64-22 116-20 158 6M318 174c54-16 96-12 126 12"/>',
-		signal: '<path d="M76 214h78l34-96 64 156 54-216 52 156h106M112 90c42-38 92-56 150-54M418 90c-44-37-95-55-152-54M166 280c72 28 142 28 210 0"/>'
+		monogram: '<path d="M14 47V17l18 18 18-18v30M14 47h36"/>',
+		stars: '<path d="M32 7l5 20 20 5-20 5-5 20-5-20-20-5 20-5z"/>',
+		orbit: '<ellipse cx="32" cy="32" rx="24" ry="11" transform="rotate(-32 32 32)"/><ellipse cx="32" cy="32" rx="24" ry="11" transform="rotate(32 32 32)"/><circle cx="32" cy="32" r="3"/>',
+		mesh: '<path d="M32 7l25 25-25 25L7 32zM32 7v50M7 32h50M20 20l24 24M44 20L20 44"/>',
+		signal: '<path d="M6 34h10l7-15 9 27 9-34 7 22h10"/>'
 	};
 
-	return `<svg viewBox="0 0 540 320" aria-hidden="true">${paths[pattern] || paths.monogram}</svg>`;
+	return `<svg viewBox="0 0 64 64" aria-hidden="true">${paths[pattern] || paths.monogram}</svg>`;
 }
 
 function cardMarkup(card, isMine = false) {
 	const safeSignature = cleanDisplayValue(card.signature, 28);
+	const longName = cleanDisplayValue(card.name, 24).length > 19;
 
 	return `
 		<div class="visitor-card-frame${isMine ? ' is-mine' : ''}">
-			<article class="visitor-card" data-color="${escapeHtml(card.color)}">
-				<div class="visitor-card-art">${patternSvg(card.pattern)}</div>
+			<article class="visitor-card${longName ? ' has-long-name' : ''}" data-color="${escapeHtml(card.color)}">
 				<div class="visitor-card-content">
 					<div class="visitor-card-top">
 						<div class="visitor-card-brand">
-							<span class="visitor-card-monogram">MT</span>
-							<span>MEHUL TYAGI<small>PORTFOLIO / VISITORS</small></span>
+							<span class="visitor-card-monogram">MT/</span>
+							<span>MEHUL TYAGI<small>VISITOR SERIES</small></span>
 						</div>
-						<span class="visitor-card-edition">GUEST<br>PASS</span>
+						<div class="visitor-card-seal">${patternSvg(card.pattern)}</div>
 					</div>
 					<div class="visitor-card-meta">
-						<span class="visitor-card-label">ISSUED TO</span>
+						<span class="visitor-card-label">GUEST PASS / ${escapeHtml(card.number)}</span>
 						<strong class="visitor-card-name">${escapeHtml(card.name)}</strong>
 					</div>
 					<div class="visitor-card-footer">
 						<div class="visitor-card-detail"><span>ISSUED</span><strong class="visitor-card-date">${escapeHtml(card.issued)}</strong></div>
-						<div class="visitor-card-detail"><span>PASS NO.</span><strong>${escapeHtml(card.number)}</strong></div>
+						<div class="visitor-card-detail"><span>IDENTITY</span><strong>VISITOR</strong></div>
 						<div class="visitor-signature">
 							<span>SIGNATURE</span>
 							${safeSignature ? `<span class="visitor-signature-text">${escapeHtml(safeSignature)}</span>` : ''}
