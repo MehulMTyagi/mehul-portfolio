@@ -7,10 +7,17 @@ const API_URL = '/api/visitor-cards';
 const BASE_GUEST_COUNT = 1000;
 
 const colorMap = {
-	onyx: '#f5f1e8',
-	emerald: '#64f28a',
-	violet: '#b996ff',
-	champagne: '#e6c27a'
+	onyx: '#ddff67',
+	emerald: '#9cf5b5',
+	violet: '#ff94dc',
+	champagne: '#ffda94'
+};
+
+const designNames = {
+	onyx: 'Chrome',
+	emerald: 'Botanical',
+	violet: 'Prism',
+	champagne: 'Solar'
 };
 
 const colorAliases = {
@@ -610,7 +617,7 @@ function renderColorStats(cards) {
 		const percent = Math.round((count / total) * 100);
 		return `
 			<div class="visitor-color-row">
-				<span style="color:${hex}">${color}</span>
+				<span style="color:${hex}">${designNames[color]}</span>
 				<div class="visitor-color-track"><div class="visitor-color-fill" style="--fill:${hex};width:${percent}%"></div></div>
 				<span>${percent}%</span>
 			</div>

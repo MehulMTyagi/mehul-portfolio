@@ -104,6 +104,31 @@ test('older local cards render with day/month/year dates', () => {
 	assert.match(markup, /Neha Kapoor/);
 });
 
+test('gallery stats use artwork names without changing stored card colors', () => {
+	const card = {
+		id: 'botanical-card', name: 'Neha Kapoor', color: 'emerald', pattern: 'orbit',
+		number: 1010, createdAt: Date.parse('2026-08-21T12:00:00.000Z')
+	};
+	const stats = { innerHTML: '' };
+	const values = new Map([['mehul-visitor-cards-v2', JSON.stringify([card])]]);
+	const context = vm.createContext({
+		console: { warn() {} },
+		localStorage: { getItem: key => values.get(key) || null },
+		window: { crypto: { randomUUID: () => 'fresh-id' }, location: { search: '', hash: '' } },
+		document: {
+			body: { classList: { toggle() {} } },
+			getElementById: id => id === 'visitorColorStats' ? stats : null,
+			querySelectorAll: () => []
+		},
+		URLSearchParams
+	});
+	vm.runInContext(readFileSync(join(root, 'visitor-card.js'), 'utf8'), context);
+	assert.equal(vm.runInContext('readLocalCards()[0].color', context), 'emerald');
+	for (const name of ['Chrome', 'Botanical', 'Prism', 'Solar']) {
+		assert.match(stats.innerHTML, new RegExp(`>${name}<`));
+	}
+});
+
 test('cards created just after midnight in India use the local date', async () => {
 	const request = loadApi([{
 		id: 'midnight-card', name: 'Arjun Mehta', number: 1015,

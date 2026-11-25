@@ -596,6 +596,7 @@
 }
 
 .visitor-swatch {
+  position: relative;
   width: 66px;
   height: 44px;
   border: 2px solid rgba(255, 255, 255, 0.26);
@@ -603,6 +604,23 @@
   background-position: center;
   background-size: cover;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.visitor-swatch span {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 3px 1px;
+  border-radius: 0 0 4px 4px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  font-family: "SF Pro Medium", "Inter", sans-serif;
+  font-size: 0.52rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .visitor-swatch:hover,
@@ -716,7 +734,7 @@
 
 .visitor-color-row {
   display: grid;
-  grid-template-columns: 96px 1fr 44px;
+  grid-template-columns: 110px minmax(0, 1fr) 44px;
   align-items: center;
   gap: 12px;
   color: var(--visitor-muted);
@@ -865,7 +883,7 @@
   }
 
   .visitor-color-row {
-    grid-template-columns: 86px 1fr 38px;
+    grid-template-columns: 104px minmax(0, 1fr) 38px;
   }
 }
 
